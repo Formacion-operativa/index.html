@@ -182,6 +182,11 @@
   .agenda-item .area{font-size:13.5px; margin-top:3px;}
   .agenda-item .meta{font-size:12px; color:var(--muted); margin-top:4px;}
   .agenda-item .tecs{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.4;}
+  .agenda-item{cursor:pointer; position:relative;}
+  .agenda-item .signed-badge{
+    position:absolute; top:11px; right:13px; background:var(--green-bg); color:var(--green);
+    font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:10px;
+  }
   .agenda-stats{display:flex; gap:10px; margin:10px 0;}
 
   /* firma */
@@ -190,6 +195,36 @@
   .sigwrap .ph{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; color:#B7BEDB; pointer-events:none;}
   .sig-row{display:flex; justify-content:space-between; align-items:center; margin-top:6px;}
   .sig-label{font-size:12.5px; font-weight:600; color:var(--muted);}
+
+  /* modal de sesion */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(20,24,50,.55); z-index:50;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .modal-sheet{
+    background:var(--bg); width:100%; max-width:760px; max-height:92vh; overflow-y:auto;
+    border-radius:18px 18px 0 0; padding:8px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .modal-sheet h2{font-size:18px; color:var(--navy); margin-bottom:2px;}
+  .modal-sheet .sub{font-size:12.5px; color:var(--muted); margin-bottom:14px;}
+  .modal-close{position:sticky; top:0; text-align:right; margin-bottom:4px; background:var(--bg); padding-top:8px;}
+  .modal-close button{background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; padding:4px 8px;}
+  .filelist{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .fileitem{
+    display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line);
+    border-radius:10px; padding:8px 10px;
+  }
+  .fileitem img{width:40px; height:40px; object-fit:cover; border-radius:6px; flex-shrink:0;}
+  .fileitem .fname{flex:1; font-size:12.5px; word-break:break-word;}
+  .fileitem .frm{background:none; border:none; color:var(--red); font-size:12px; cursor:pointer; font-weight:700;}
+  .filepicker{
+    display:block; text-align:center; padding:16px; border:1.5px dashed var(--line); border-radius:10px;
+    color:var(--navy); font-size:13px; font-weight:600; cursor:pointer; background:#fbfbfd;
+  }
+  .filepicker input{display:none;}
+  .modal-savebar{display:flex; gap:10px; margin-top:16px;}
+  .modal-savebar .btn{flex:1;}
+  .sesion-msg{font-size:12px; color:var(--muted); margin-top:8px; text-align:center;}
 </style>
 </head>
 <body>
@@ -792,7 +827,8 @@ async function drawAgendaBody(formador) {
     }
     const dstr = d.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
     const cls = s.tipo === "Administrativa" ? "admin" : "";
-    html += `<div class="agenda-item ${cls}">
+    html += `<div class="agenda-item ${cls}" data-sid="${s.id}">
+      <span class="signed-badge" id="badge_${s.id}" style="display:none;">✓ Firmado</span>
       <div class="row1"><span class="date">${dstr}</span><span class="turno">${s.turno}</span></div>
       <div class="area">${s.tipo}: ${s.area}</div>
       <div class="meta">${s.cluster} · ${s.n_tecnicos} técnico(s) · ${s.fase}</div>
@@ -800,6 +836,194 @@ async function drawAgendaBody(formador) {
     </div>`;
   });
   body.innerHTML = html;
+
+  document.querySelectorAll(".agenda-item").forEach(item => {
+    item.onclick = () => openSessionModal(mine.find(s => s.id === item.dataset.sid));
+  });
+  markSignedBadges(mine.map(s => s.id));
+}
+
+async function markSignedBadges(ids) {
+  try {
+    const list = await storageList("ses_", true);
+    const signedIds = new Set((list.keys || []).map(k => k.replace("ses_", "")));
+    ids.forEach(id => {
+      if (signedIds.has(id)) {
+        const b = document.getElementById("badge_" + id);
+        if (b) b.style.display = "inline-block";
+      }
+    });
+  } catch (e) { /* silencioso: si falla, simplemente no se muestran badges */ }
+}
+
+// ---------- modal de sesion: firma + adjuntos ----------
+let modalFiles = [];
+const MAX_PAYLOAD = 3.8 * 1024 * 1024; // margen bajo el límite de 5MB de la clave de almacenamiento
+
+async function openSessionModal(session) {
+  modalFiles = [];
+  const existing = document.getElementById("modalBackdrop");
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.id = "modalBackdrop";
+  const d = new Date(session.fecha + "T00:00:00");
+  const dstr = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-close"><button id="modalCloseBtn">✕</button></div>
+      <h2>${session.tipo}: ${session.area}</h2>
+      <div class="sub">${dstr} · ${session.turno} · ${session.cluster}</div>
+      <div class="card" style="margin-bottom:0;">
+        <div style="font-size:12.5px;color:var(--muted);">Técnicos convocados</div>
+        <div style="font-size:13px;margin-top:4px;">${session.tecnicos}</div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--navy);margin-bottom:8px;">Documentos de la sesión</h3>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Adjunta fotos o PDF: control de asistencia firmado en papel, cuestionario del SEPE, etc.</div>
+        <label class="filepicker">
+          📎 Toca para adjuntar archivo (foto o PDF)
+          <input type="file" id="fileInput" accept="image/*,application/pdf" multiple>
+        </label>
+        <div class="filelist" id="fileList"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--navy);margin-bottom:10px;">Firma de conformidad</h3>
+        ${signatureBlock("sigSesion", "Firma del formador")}
+      </div>
+
+      <div class="modal-savebar">
+        <button class="btn btn-ghost" id="modalCancelBtn">Cancelar</button>
+        <button class="btn btn-primary" id="modalSaveBtn">Guardar</button>
+      </div>
+      <div class="sesion-msg" id="modalMsg"></div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  initSignaturePad("sigSesion");
+
+  document.getElementById("modalCloseBtn").onclick = closeSessionModal;
+  document.getElementById("modalCancelBtn").onclick = closeSessionModal;
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeSessionModal(); });
+
+  document.getElementById("fileInput").onchange = (e) => handleFiles(e.target.files);
+  document.getElementById("modalSaveBtn").onclick = () => saveSessionRecord(session);
+
+  // cargar registro existente si lo hay
+  try {
+    const r = await storageGet("ses_" + session.id, true);
+    const rec = JSON.parse(r.value);
+    modalFiles = rec.archivos || [];
+    renderFileList();
+    document.getElementById("modalMsg").textContent = "Ya había un registro guardado para esta sesión — puedes revisarlo o actualizarlo.";
+  } catch (e) { /* no había registro previo, formulario en blanco */ }
+}
+
+function closeSessionModal() {
+  const el = document.getElementById("modalBackdrop");
+  if (el) el.remove();
+}
+
+function renderFileList() {
+  const wrap = document.getElementById("fileList");
+  if (!wrap) return;
+  wrap.innerHTML = modalFiles.map((f, i) => `
+    <div class="fileitem">
+      ${f.dataURL.startsWith("data:image") ? `<img src="${f.dataURL}">` : "📄"}
+      <span class="fname">${f.name}</span>
+      <button type="button" class="frm" data-i="${i}">Quitar</button>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".frm").forEach(btn => {
+    btn.onclick = () => { modalFiles.splice(Number(btn.dataset.i), 1); renderFileList(); };
+  });
+}
+
+function currentPayloadSize() {
+  return modalFiles.reduce((sum, f) => sum + f.dataURL.length, 0);
+}
+
+function handleFiles(fileList) {
+  const msg = document.getElementById("modalMsg");
+  Array.from(fileList).forEach(file => {
+    if (file.type.startsWith("image/")) {
+      compressImage(file, (dataURL) => addFile(file.name, dataURL));
+    } else if (file.type === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => addFile(file.name, reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      msg.textContent = `"${file.name}" no es una imagen ni un PDF — no se ha adjuntado.`;
+    }
+  });
+  document.getElementById("fileInput").value = "";
+}
+
+function addFile(name, dataURL) {
+  const msg = document.getElementById("modalMsg");
+  if (currentPayloadSize() + dataURL.length > MAX_PAYLOAD) {
+    msg.textContent = "No caben más archivos en esta sesión (límite ~3.5 MB en total). Elimina alguno o reduce el tamaño de las fotos.";
+    return;
+  }
+  modalFiles.push({ name, dataURL });
+  msg.textContent = "";
+  renderFileList();
+}
+
+function compressImage(file, cb) {
+  const img = new Image();
+  const reader = new FileReader();
+  reader.onload = () => {
+    img.onload = () => {
+      const maxDim = 1400;
+      let { width, height } = img;
+      if (width > height && width > maxDim) { height *= maxDim / width; width = maxDim; }
+      else if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      cb(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveSessionRecord(session) {
+  const btn = document.getElementById("modalSaveBtn");
+  const msg = document.getElementById("modalMsg");
+  const firma = getSignatureDataURL("sigSesion");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+  const record = {
+    sessionId: session.id,
+    zona: session.zona,
+    fecha: session.fecha,
+    tipo: session.tipo,
+    area: session.area,
+    cluster: session.cluster,
+    tecnicos: session.tecnicos,
+    firma: firma,
+    archivos: modalFiles,
+    guardadoEn: new Date().toISOString(),
+  };
+  try {
+    const res = await storageSet("ses_" + session.id, JSON.stringify(record), true);
+    if (!res) throw new Error("sin respuesta");
+    msg.textContent = "✓ Guardado.";
+    btn.textContent = "Guardado ✓";
+    const badge = document.getElementById("badge_" + session.id);
+    if (badge) badge.style.display = "inline-block";
+    setTimeout(closeSessionModal, 900);
+  } catch (e) {
+    msg.textContent = "No se pudo guardar (puede que el conjunto de archivos sea demasiado grande). Prueba a quitar alguno.";
+    btn.textContent = "Guardar";
+    btn.disabled = false;
+  }
 }
 
 document.getElementById("saveBtn").onclick = saveChecklist;
