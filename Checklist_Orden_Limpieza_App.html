@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checklist Orden y Limpieza · Red Ralarsa</title>
+<style>
+  :root{
+    --navy:#1E2761;
+    --navy-dark:#141B49;
+    --ice:#CADCFC;
+    --ice-soft:#EAF0FB;
+    --bg:#F4F6FB;
+    --card:#FFFFFF;
+    --line:#DDE3F0;
+    --text:#1C2340;
+    --muted:#6B7290;
+    --green:#1E7E45;
+    --green-bg:#E8F5EC;
+    --red:#B3261E;
+    --red-bg:#FCEAE9;
+    --amber:#8A5A00;
+    --amber-bg:#FDF3DF;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; margin:0;}
+  .app{max-width:760px; margin:0 auto; padding-bottom:110px;}
+
+  header.top{
+    background:var(--navy); color:#fff; padding:22px 20px 18px;
+    position:sticky; top:0; z-index:20;
+  }
+  header.top h1{font-size:20px; font-weight:700; letter-spacing:.2px;}
+  header.top p{margin:4px 0 0; font-size:12.5px; color:var(--ice); opacity:.9;}
+
+  nav.tabs{display:flex; gap:6px; padding:12px 20px 0;}
+  nav.tabs button{
+    flex:1; padding:10px 8px; border:none; border-radius:10px 10px 0 0;
+    background:rgba(255,255,255,.12); color:#fff; font-size:13.5px; font-weight:600;
+    cursor:pointer; opacity:.75;
+  }
+  nav.tabs button.active{background:var(--bg); color:var(--navy); opacity:1;}
+
+  main{padding:18px 16px 0;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-bottom:14px;
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:520px){ .grid2{grid-template-columns:1fr;} }
+
+  label.field{display:block; font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:4px;}
+  input[type=text], input[type=date], select, textarea{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px;
+    font-size:14.5px; font-family:inherit; color:var(--text); background:#fff;
+  }
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--navy); outline-offset:1px;}
+  .fieldwrap{margin-bottom:10px;}
+
+  .section-head{
+    display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+    padding:2px 0;
+  }
+  .section-head h3{font-size:16px; color:var(--navy);}
+  .section-head .count{font-size:12px; color:var(--muted); font-family:-apple-system,sans-serif; font-weight:600;}
+  .section-note{font-size:12px; color:var(--muted); font-style:italic; margin:4px 0 10px;}
+  .chev{transition:transform .15s ease; color:var(--navy); font-size:13px;}
+  .section.collapsed .chev{transform:rotate(-90deg);}
+  .section.collapsed .items{display:none;}
+
+  .item{border-top:1px solid var(--line); padding:12px 0;}
+  .item:first-of-type{border-top:none;}
+  .item-text{font-size:14px; margin-bottom:8px; line-height:1.35;}
+  .seg{display:flex; gap:6px; margin-bottom:8px;}
+  .seg button{
+    flex:1; padding:8px 4px; border:1.5px solid var(--line); background:#fff;
+    border-radius:8px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .seg button[data-v="si"].on{background:var(--green-bg); border-color:var(--green); color:var(--green);}
+  .seg button[data-v="no"].on{background:var(--red-bg); border-color:var(--red); color:var(--red);}
+  .seg button[data-v="na"].on{background:var(--ice-soft); border-color:var(--navy); color:var(--navy);}
+  .obs{width:100%; font-size:13px; padding:7px 9px;}
+
+  .progress-bar{height:6px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:8px;}
+  .progress-bar > div{height:100%; background:var(--navy); transition:width .2s ease;}
+
+  .summary-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:6px;}
+  .stat{flex:1; min-width:90px; background:var(--ice-soft); border-radius:10px; padding:10px 12px; text-align:center;}
+  .stat .n{font-size:20px; font-weight:700; color:var(--navy); font-family:Georgia,serif;}
+  .stat .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+
+  .valoracion{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .valoracion button{
+    padding:9px 14px; border-radius:20px; border:1.5px solid var(--line); background:#fff;
+    font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .valoracion button.on[data-v="Correcto"]{background:var(--green-bg); border-color:var(--green); color:var(--green);}
+  .valoracion button.on[data-v="Mejorable"]{background:var(--amber-bg); border-color:var(--amber); color:var(--amber);}
+  .valoracion button.on[data-v="Requiere acción inmediata"]{background:var(--red-bg); border-color:var(--red); color:var(--red);}
+
+  .savebar{
+    position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom)); z-index:30;
+    display:flex; gap:10px; align-items:center; max-width:760px; margin:0 auto;
+  }
+  .savebar .msg{flex:1; font-size:12px; color:var(--muted);}
+  .btn{
+    padding:12px 20px; border-radius:10px; border:none; font-size:14.5px; font-weight:700;
+    cursor:pointer; font-family:inherit;
+  }
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:disabled{background:#B7BEDB; cursor:default;}
+  .btn-ghost{background:var(--ice-soft); color:var(--navy);}
+  .btn-sm{padding:7px 12px; font-size:12.5px; border-radius:8px;}
+
+  .notice{
+    background:var(--ice-soft); border:1px solid var(--ice); border-radius:10px;
+    padding:10px 12px; font-size:12px; color:var(--navy); margin:14px 16px 0; line-height:1.4;
+  }
+
+  /* Historico */
+  .hist-toolbar{display:flex; gap:8px; margin-bottom:12px;}
+  .hist-toolbar select, .hist-toolbar input{flex:1;}
+  .entry{
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px;
+    margin-bottom:10px; cursor:pointer;
+  }
+  .entry-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .entry-top .c{font-weight:700; font-size:15px; color:var(--navy);}
+  .entry-top .d{font-size:12px; color:var(--muted); margin-top:2px;}
+  .badge{padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .badge.ok{background:var(--green-bg); color:var(--green);}
+  .badge.warn{background:var(--amber-bg); color:var(--amber);}
+  .badge.bad{background:var(--red-bg); color:var(--red);}
+  .entry-meta{font-size:12px; color:var(--muted); margin-top:8px;}
+  .entry-detail{display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;}
+  .entry.open .entry-detail{display:block;}
+  .entry-detail .di{font-size:12.5px; padding:5px 0; border-top:1px solid var(--line);}
+  .entry-detail .di:first-child{border-top:none;}
+  .empty{text-align:center; color:var(--muted); font-size:13.5px; padding:40px 20px;}
+  .loading{text-align:center; color:var(--muted); font-size:13px; padding:20px;}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <h1>Checklist Orden y Limpieza</h1>
+    <p>Plan de Formación · Red Técnica Ralarsa</p>
+    <nav class="tabs">
+      <button id="tabNewBtn" class="active">Nuevo checklist</button>
+      <button id="tabHistBtn">Histórico</button>
+    </nav>
+  </header>
+
+  <main id="viewNew"></main>
+  <main id="viewHist" style="display:none;"></main>
+
+  <div class="notice" id="storageNotice">
+    Los registros se guardan en un espacio compartido de esta app: cualquier persona de RRHH o formación operativa que la abra puede verlos y descargarlos. No es (todavía) una carpeta de red — usa "Exportar CSV" en Histórico para subirlo manualmente a la carpeta compartida.
+  </div>
+</div>
+
+<div class="savebar" id="saveBar">
+  <div class="msg" id="saveMsg">Completa los datos del centro para guardar.</div>
+  <button class="btn btn-primary" id="saveBtn" disabled>Guardar checklist</button>
+</div>
+
+<script>
+const SECTIONS = [
+  { title: "1. Zonas comunes", items: [
+    "Baño / aseo: limpio, con papel, jabón y papelera vacía",
+    "Duchas y vestuarios (si los hay): limpios, sin humedad ni malos olores",
+    "Taquillas: cerradas, sin objetos fuera de lugar",
+    "Sala de descanso / office: mesas limpias, nevera y menaje en orden",
+    "Recepción / zona de atención al cliente: presentable, sin cajas fuera de sitio",
+  ]},
+  { title: "2. Oficina / administración", items: [
+    "Mesas y escritorios despejados de material ajeno al trabajo diario",
+    "Documentación archivada (no apilada suelta ni fuera de carpetas)",
+    "Cableado de equipos recogido y sin riesgo de tropiezo",
+    "Papeleras vaciadas y zona general sin acumulación de papel",
+  ]},
+  { title: "3. Almacenamiento / stock", items: [
+    "Estanterías ordenadas, con material apilado de forma estable",
+    "Referencias etiquetadas y localizables",
+    "Productos químicos / peligrosos separados, señalizados y con ficha de seguridad accesible",
+    "Sin stock caducado, dañado o depositado directamente en el suelo",
+    "Pasillos de almacén libres de obstáculos",
+  ]},
+  { title: "4. Banco de trabajo / zona técnica", items: [
+    "Superficie de trabajo despejada al terminar cada intervención",
+    "Herramientas ordenadas en su ubicación (panel, carro o cajonera)",
+    "Sin restos de material, virutas o residuos acumulados",
+    "Equipos y máquinas (pulidora, laminadora, etc.) limpios tras su uso",
+  ]},
+  { title: "5. Taller / bahías de reparación", items: [
+    "Suelo limpio, sin manchas de aceite, grasa o líquidos derramados",
+    "Señalización de seguridad visible y en buen estado",
+    "Contenedores de residuos correctamente separados (vidrio, plástico, químicos)",
+    "EPIs (guantes, gafas, mascarillas) disponibles, visibles y en buen estado",
+    "Extintores accesibles, con cartel identificativo y revisión en vigor",
+  ]},
+  { title: "6. Exterior / entrada / imagen de marca", items: [
+    "Fachada y rótulo del centro en buen estado",
+    "Zona de acceso y aparcamiento de vehículos despejada",
+    "Contenedores exteriores tapados, sin residuos alrededor",
+    "Imagen general del centro acorde a la identidad de marca Ralarsa",
+  ]},
+  { title: "7. Furgoneta Unidad Móvil", note: "Si el centro no dispone de Unidad Móvil, marca todos los ítems como N/A.", items: [
+    "Interior de la furgoneta limpio y ordenado, sin residuos ni objetos sueltos",
+    "Material y herramienta a bordo colocados en su ubicación fija",
+    "Exterior del vehículo limpio y rotulación en buen estado",
+    "ITV en vigor (comprobar fecha en la ficha técnica)",
+    "Documentación del vehículo presente (permiso de circulación, seguro)",
+  ]},
+  { title: "8. Equipo de calibración", items: [
+    "Ordenador portátil de calibración con el software actualizado a la última versión",
+    "Equipo de diagnosis: estado físico correcto, sin daños ni conexiones deterioradas",
+    "Soporte / carro de calibración: estable, ruedas y anclajes en buen estado",
+    "Paneles de calibración: sin golpes, limpios y correctamente almacenados",
+    "Calibración del propio equipo en vigor (fecha de última verificación)",
+  ]},
+];
+
+let state = { items: {}, valoracion: null };
+SECTIONS.forEach((s, si) => s.items.forEach((_, ii) => { state.items[si + "_" + ii] = { v: null, obs: "" }; }));
+
+// ---------- render: Nuevo checklist ----------
+function renderNew() {
+  const el = document.getElementById("viewNew");
+  let html = "";
+  html += '<div class="card">';
+  html += '<div class="grid2">';
+  html += field("centro", "Centro", "text", true);
+  html += field("ciudad", "Ciudad / Provincia", "text", false);
+  html += field("fecha", "Fecha de la visita", "date", true);
+  html += field("formador", "Formador", "text", true);
+  html += field("responsable", "Responsable del centro", "text", false);
+  html += field("visitaAnterior", "Visita anterior (fecha)", "date", false);
+  html += "</div></div>";
+
+  SECTIONS.forEach((s, si) => {
+    html += `<div class="card section" id="sec_${si}">`;
+    html += `<div class="section-head" data-si="${si}">
+        <h3>${s.title}</h3>
+        <span class="count" id="cnt_${si}"></span>
+        <span class="chev">▾</span>
+      </div>`;
+    if (s.note) html += `<div class="section-note">${s.note}</div>`;
+    html += '<div class="items">';
+    s.items.forEach((text, ii) => {
+      const key = si + "_" + ii;
+      html += `<div class="item">
+        <div class="item-text">${text}</div>
+        <div class="seg" data-key="${key}">
+          <button data-v="si">Sí</button>
+          <button data-v="no">No</button>
+          <button data-v="na">N/A</button>
+        </div>
+        <input class="obs" type="text" placeholder="Observaciones (opcional)" data-obs="${key}">
+      </div>`;
+    });
+    html += "</div></div>";
+  });
+
+  html += '<div class="card">';
+  html += '<h3 style="font-size:16px;color:var(--navy);margin-bottom:6px;">Resumen de la visita</h3>';
+  html += '<div class="summary-row">';
+  html += '<div class="stat"><div class="n" id="stSi">0</div><div class="l">Sí</div></div>';
+  html += '<div class="stat"><div class="n" id="stNo">0</div><div class="l">No</div></div>';
+  html += '<div class="stat"><div class="n" id="stPct">—</div><div class="l">% correcto</div></div>';
+  html += '</div>';
+  html += '<div class="progress-bar"><div id="progFill" style="width:0%"></div></div>';
+  html += '<div class="valoracion" id="valoracionBtns">';
+  ["Correcto", "Mejorable", "Requiere acción inmediata"].forEach(v => {
+    html += `<button data-v="${v}">${v}</button>`;
+  });
+  html += "</div>";
+  html += '<div class="fieldwrap" style="margin-top:12px;">';
+  html += '<label class="field" for="acciones">Acciones correctivas acordadas y plazo</label>';
+  html += '<textarea id="acciones" rows="3" placeholder="Ej.: reponer cartel de extintor en bahía 2 antes del 15/11"></textarea>';
+  html += "</div></div>";
+
+  el.innerHTML = html;
+  bindNewView();
+  updateSummary();
+}
+
+function field(id, label, type, required) {
+  return `<div class="fieldwrap">
+    <label class="field" for="${id}">${label}${required ? " *" : ""}</label>
+    <input type="${type}" id="${id}">
+  </div>`;
+}
+
+function bindNewView() {
+  document.querySelectorAll(".section-head").forEach(h => {
+    h.onclick = () => h.closest(".section").classList.toggle("collapsed");
+  });
+  document.querySelectorAll(".seg").forEach(seg => {
+    const key = seg.dataset.key;
+    seg.querySelectorAll("button").forEach(btn => {
+      btn.onclick = () => {
+        state.items[key].v = btn.dataset.v;
+        seg.querySelectorAll("button").forEach(b => b.classList.remove("on"));
+        btn.classList.add("on");
+        updateSummary();
+        checkReady();
+      };
+    });
+  });
+  document.querySelectorAll("[data-obs]").forEach(inp => {
+    inp.oninput = () => { state.items[inp.dataset.obs].obs = inp.value; };
+  });
+  document.querySelectorAll("#valoracionBtns button").forEach(btn => {
+    btn.onclick = () => {
+      state.valoracion = btn.dataset.v;
+      document.querySelectorAll("#valoracionBtns button").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+    };
+  });
+  ["centro", "fecha", "formador"].forEach(id => {
+    document.getElementById(id).oninput = checkReady;
+  });
+}
+
+function updateSummary() {
+  let si = 0, no = 0, na = 0;
+  SECTIONS.forEach((s, sidx) => {
+    let secSi = 0, secTotal = s.items.length;
+    s.items.forEach((_, iidx) => {
+      const v = state.items[sidx + "_" + iidx].v;
+      if (v === "si") { si++; secSi++; }
+      else if (v === "no") no++;
+      else if (v === "na") na++;
+    });
+    const cnt = document.getElementById("cnt_" + sidx);
+    if (cnt) cnt.textContent = secSi + "/" + secTotal;
+  });
+  const total = si + no;
+  const pct = total > 0 ? Math.round((si / total) * 100) : null;
+  document.getElementById("stSi").textContent = si;
+  document.getElementById("stNo").textContent = no;
+  document.getElementById("stPct").textContent = pct === null ? "—" : pct + "%";
+  document.getElementById("progFill").style.width = (pct || 0) + "%";
+  if (pct !== null) {
+    document.getElementById("progFill").style.background =
+      pct >= 90 ? "var(--green)" : pct >= 70 ? "#C08A00" : "var(--red)";
+  }
+}
+
+function checkReady() {
+  const centro = document.getElementById("centro").value.trim();
+  const fecha = document.getElementById("fecha").value;
+  const formador = document.getElementById("formador").value.trim();
+  const ready = centro && fecha && formador;
+  document.getElementById("saveBtn").disabled = !ready;
+  document.getElementById("saveMsg").textContent = ready
+    ? "Listo para guardar."
+    : "Completa Centro, Fecha y Formador para guardar.";
+}
+
+// ---------- save ----------
+async function saveChecklist() {
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+  let si = 0, no = 0, na = 0;
+  const detail = [];
+  SECTIONS.forEach((s, sidx) => {
+    s.items.forEach((text, iidx) => {
+      const it = state.items[sidx + "_" + iidx];
+      if (it.v === "si") si++;
+      else if (it.v === "no") no++;
+      else if (it.v === "na") na++;
+      detail.push({ seccion: s.title, item: text, valor: it.v || "sin marcar", obs: it.obs || "" });
+    });
+  });
+  const total = si + no;
+  const pct = total > 0 ? Math.round((si / total) * 100) : null;
+
+  const record = {
+    id: "chk_" + Date.now(),
+    centro: document.getElementById("centro").value.trim(),
+    ciudad: document.getElementById("ciudad").value.trim(),
+    fecha: document.getElementById("fecha").value,
+    formador: document.getElementById("formador").value.trim(),
+    responsable: document.getElementById("responsable").value.trim(),
+    visitaAnterior: document.getElementById("visitaAnterior").value,
+    si, no, na, pct,
+    valoracion: state.valoracion || (pct === null ? "Sin evaluar" : pct >= 90 ? "Correcto" : pct >= 70 ? "Mejorable" : "Requiere acción inmediata"),
+    acciones: document.getElementById("acciones").value.trim(),
+    detail,
+    guardadoEn: new Date().toISOString(),
+  };
+
+  try {
+    const res = await window.storage.set(record.id, JSON.stringify(record), true);
+    if (!res) throw new Error("sin respuesta");
+    document.getElementById("saveMsg").textContent = "✓ Guardado. Puedes verlo en Histórico.";
+    btn.textContent = "Guardado ✓";
+    setTimeout(() => { resetForm(); }, 1200);
+  } catch (e) {
+    document.getElementById("saveMsg").textContent = "No se pudo guardar. Inténtalo de nuevo.";
+    btn.textContent = "Guardar checklist";
+    btn.disabled = false;
+  }
+}
+
+function resetForm() {
+  state = { items: {}, valoracion: null };
+  SECTIONS.forEach((s, si) => s.items.forEach((_, ii) => { state.items[si + "_" + ii] = { v: null, obs: "" }; }));
+  renderNew();
+  document.getElementById("saveBtn").textContent = "Guardar checklist";
+  document.getElementById("saveBtn").disabled = true;
+}
+
+// ---------- Historico ----------
+let histCache = null;
+
+async function renderHist() {
+  const el = document.getElementById("viewHist");
+  el.innerHTML = '<div class="loading">Cargando histórico…</div>';
+  try {
+    const list = await window.storage.list("chk_", true);
+    const keys = (list && list.keys) || [];
+    const records = [];
+    for (const k of keys) {
+      try {
+        const r = await window.storage.get(k, true);
+        if (r && r.value) records.push(JSON.parse(r.value));
+      } catch (e) { /* skip unreadable entry */ }
+    }
+    records.sort((a, b) => (b.guardadoEn || "").localeCompare(a.guardadoEn || ""));
+    histCache = records;
+    drawHist(records);
+  } catch (e) {
+    el.innerHTML = '<div class="empty">No se pudo cargar el histórico. Inténtalo de nuevo más tarde.</div>';
+  }
+}
+
+function drawHist(records) {
+  const el = document.getElementById("viewHist");
+  if (!records.length) {
+    el.innerHTML = '<div class="empty">Todavía no hay checklists guardados.<br>Los que se guarden en "Nuevo checklist" aparecerán aquí.</div>';
+    return;
+  }
+  const centros = Array.from(new Set(records.map(r => r.centro))).sort();
+  let html = '<div class="card">';
+  html += '<div class="hist-toolbar">';
+  html += '<select id="filterCentro"><option value="">Todos los centros</option>' +
+    centros.map(c => `<option value="${c}">${c}</option>`).join("") + "</select>";
+  html += '<button class="btn btn-ghost btn-sm" id="exportBtn">Exportar CSV</button>';
+  html += "</div>";
+  html += `<div style="font-size:12px;color:var(--muted);">${records.length} checklist(s) guardado(s) en total.</div>`;
+  html += "</div>";
+  html += '<div id="entriesWrap"></div>';
+  el.innerHTML = html;
+
+  document.getElementById("exportBtn").onclick = () => exportCSV(getFiltered());
+  document.getElementById("filterCentro").onchange = () => renderEntries(getFiltered());
+
+  function getFiltered() {
+    const c = document.getElementById("filterCentro").value;
+    return c ? records.filter(r => r.centro === c) : records;
+  }
+  renderEntries(records);
+}
+
+function renderEntries(records) {
+  const wrap = document.getElementById("entriesWrap");
+  wrap.innerHTML = records.map(r => {
+    const badgeClass = r.valoracion === "Correcto" ? "ok" : r.valoracion === "Mejorable" ? "warn" : "bad";
+    const detailRows = r.detail.map(d =>
+      `<div class="di"><b>${d.item}</b> — ${d.valor.toUpperCase()}${d.obs ? " · " + d.obs : ""}</div>`
+    ).join("");
+    return `<div class="entry" data-id="${r.id}">
+      <div class="entry-top">
+        <div>
+          <div class="c">${r.centro}${r.ciudad ? " · " + r.ciudad : ""}</div>
+          <div class="d">${r.fecha} · Formador: ${r.formador}</div>
+        </div>
+        <span class="badge ${badgeClass}">${r.pct === null ? "—" : r.pct + "%"}</span>
+      </div>
+      <div class="entry-meta">Sí: ${r.si} · No: ${r.no} · N/A: ${r.na}${r.acciones ? " · Acciones: " + r.acciones : ""}</div>
+      <div class="entry-detail">${detailRows}</div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".entry").forEach(e => {
+    e.onclick = (ev) => { e.classList.toggle("open"); };
+  });
+}
+
+function exportCSV(records) {
+  const rows = [["Centro","Ciudad/Provincia","Fecha","Formador","Responsable","Sí","No","N/A","% correcto","Valoración","Acciones correctivas","Guardado en"]];
+  records.forEach(r => {
+    rows.push([r.centro, r.ciudad, r.fecha, r.formador, r.responsable, r.si, r.no, r.na, r.pct, r.valoracion, r.acciones, r.guardadoEn]);
+  });
+  const csv = rows.map(row => row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "checklists_orden_limpieza.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ---------- tabs ----------
+document.getElementById("tabNewBtn").onclick = () => switchTab("new");
+document.getElementById("tabHistBtn").onclick = () => switchTab("hist");
+function switchTab(tab) {
+  document.getElementById("tabNewBtn").classList.toggle("active", tab === "new");
+  document.getElementById("tabHistBtn").classList.toggle("active", tab === "hist");
+  document.getElementById("viewNew").style.display = tab === "new" ? "block" : "none";
+  document.getElementById("viewHist").style.display = tab === "hist" ? "block" : "none";
+  document.getElementById("saveBar").style.display = tab === "new" ? "flex" : "none";
+  if (tab === "hist") renderHist();
+}
+
+document.getElementById("saveBtn").onclick = saveChecklist;
+
+renderNew();
+</script>
+</body>
+</html>
