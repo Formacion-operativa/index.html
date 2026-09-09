@@ -1,6 +1,6 @@
-const CACHE = "checklist-ralarsa-v2";
+const CACHE = "checklist-ralarsa-v4";
 const ASSETS = ["./", "./index.html", "./manifest.json", "./agenda_data.json",
-  "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png"];
+  "./icon-192.png", "./icon-512.png", "./apple-touch-icon.png", "./ralarsa-logo.png"];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
@@ -24,7 +24,7 @@ self.addEventListener("fetch", (e) => {
 
   if (isCore) {
     e.respondWith(
-      fetch(e.request)
+      fetch(e.request, { cache: "no-store" })
         .then((res) => {
           if (res && res.status === 200) {
             const copy = res.clone();

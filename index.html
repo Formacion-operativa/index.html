@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Checklist Orden y Limpieza · Red Ralarsa</title>
 <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1E2761">
+<meta name="theme-color" content="#093A33">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -14,17 +14,17 @@
 <link rel="icon" href="icon-192.png">
 <style>
   :root{
-    --navy:#1E2761;
-    --navy-dark:#141B49;
-    --ice:#CADCFC;
-    --ice-soft:#EAF0FB;
-    --bg:#F4F6FB;
+    --navy:#093A33;
+    --navy-dark:#062824;
+    --ice:#98FF84;
+    --ice-soft:#E9F9E2;
+    --bg:#F3F8F4;
     --card:#FFFFFF;
-    --line:#DDE3F0;
-    --text:#1C2340;
-    --muted:#6B7290;
-    --green:#1E7E45;
-    --green-bg:#E8F5EC;
+    --line:#D8EAE0;
+    --text:#16241F;
+    --muted:#5D7A6C;
+    --green:#2E9E52;
+    --green-bg:#E6F6EA;
     --red:#B3261E;
     --red-bg:#FCEAE9;
     --amber:#8A5A00;
@@ -40,13 +40,14 @@
   .app{max-width:760px; margin:0 auto; padding-bottom:110px;}
 
   header.top{
-    background:var(--navy); color:#fff; padding:22px 20px 18px;
+    background:var(--navy); color:#fff; padding:18px 20px 18px;
     position:sticky; top:0; z-index:20;
   }
-  header.top h1{font-size:20px; font-weight:700; letter-spacing:.2px;}
-  header.top p{margin:4px 0 0; font-size:12.5px; color:var(--ice); opacity:.9;}
+  .brand-logo{height:26px; display:block; margin-bottom:12px;}
+  header.top h1{font-size:19px; font-weight:700; letter-spacing:.2px;}
+  header.top p{margin:4px 0 0; font-size:12.5px; color:var(--ice); opacity:.95;}
   .modebadge{display:inline-block; margin-top:8px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;}
-  .modebadge.cloud{background:rgba(46,125,50,.25); color:#B9F0C4;}
+  .modebadge.cloud{background:rgba(152,255,132,.22); color:var(--ice);}
   .modebadge.local{background:rgba(255,193,7,.22); color:#FFE08A;}
 
   nav.tabs{display:flex; gap:6px; padding:12px 20px 0;}
@@ -164,7 +165,7 @@
   }
   .formador-select button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
   .next-session{
-    background:linear-gradient(135deg, var(--navy), #2C3A8C); color:#fff; border-radius:14px;
+    background:linear-gradient(135deg, var(--navy), #0F5C4D); color:#fff; border-radius:14px;
     padding:16px; margin:14px 0;
   }
   .next-session .tag{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ice); font-weight:700;}
@@ -242,6 +243,7 @@
 <body>
 <div class="app">
   <header class="top">
+    <img src="ralarsa-logo.png" alt="Ralarsa" class="brand-logo">
     <h1>Checklist Orden y Limpieza</h1>
     <p>Plan de Formación · Red Técnica Ralarsa</p>
     <span class="modebadge" id="modeBadge"></span>
