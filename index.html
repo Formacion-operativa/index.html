@@ -155,6 +155,41 @@
   .entry-detail .di:first-child{border-top:none;}
   .empty{text-align:center; color:var(--muted); font-size:13.5px; padding:40px 20px;}
   .loading{text-align:center; color:var(--muted); font-size:13px; padding:20px;}
+
+  /* Mi agenda */
+  .formador-select{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
+  .formador-select button{
+    padding:9px 14px; border-radius:20px; border:1.5px solid var(--line); background:#fff;
+    font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .formador-select button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .next-session{
+    background:linear-gradient(135deg, var(--navy), #2C3A8C); color:#fff; border-radius:14px;
+    padding:16px; margin:14px 0;
+  }
+  .next-session .tag{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ice); font-weight:700;}
+  .next-session .d{font-size:22px; font-family:Georgia,serif; font-weight:700; margin:4px 0 2px;}
+  .next-session .s{font-size:13px; color:#DCE4FA;}
+  .agenda-month{font-size:12.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin:16px 4px 6px;}
+  .agenda-item{
+    background:var(--card); border:1px solid var(--line); border-left:4px solid var(--navy); border-radius:10px;
+    padding:11px 13px; margin-bottom:8px;
+  }
+  .agenda-item.admin{border-left-color:#C08A00;}
+  .agenda-item .row1{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .agenda-item .date{font-weight:700; font-size:13.5px; color:var(--navy);}
+  .agenda-item .turno{font-size:11.5px; color:var(--muted);}
+  .agenda-item .area{font-size:13.5px; margin-top:3px;}
+  .agenda-item .meta{font-size:12px; color:var(--muted); margin-top:4px;}
+  .agenda-item .tecs{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.4;}
+  .agenda-stats{display:flex; gap:10px; margin:10px 0;}
+
+  /* firma */
+  .sigwrap{border:1.5px dashed var(--line); border-radius:10px; background:#fbfbfd; position:relative;}
+  .sigwrap canvas{width:100%; height:130px; display:block; touch-action:none;}
+  .sigwrap .ph{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; color:#B7BEDB; pointer-events:none;}
+  .sig-row{display:flex; justify-content:space-between; align-items:center; margin-top:6px;}
+  .sig-label{font-size:12.5px; font-weight:600; color:var(--muted);}
 </style>
 </head>
 <body>
@@ -166,11 +201,13 @@
     <nav class="tabs">
       <button id="tabNewBtn" class="active">Nuevo checklist</button>
       <button id="tabHistBtn">Histórico</button>
+      <button id="tabAgendaBtn">Mi agenda</button>
     </nav>
   </header>
 
   <main id="viewNew"></main>
   <main id="viewHist" style="display:none;"></main>
+  <main id="viewAgenda" style="display:none;"></main>
 
   <div class="notice" id="storageNotice">
     Los registros se guardan en un espacio compartido de esta app: cualquier persona de RRHH o formación operativa que la abra puede verlos y descargarlos. No es (todavía) una carpeta de red — usa "Exportar CSV" en Histórico para subirlo manualmente a la carpeta compartida.
@@ -342,9 +379,95 @@ function renderNew() {
   html += '<textarea id="acciones" rows="3" placeholder="Ej.: reponer cartel de extintor en bahía 2 antes del 15/11"></textarea>';
   html += "</div></div>";
 
+  html += '<div class="card">';
+  html += '<h3 style="font-size:16px;color:var(--navy);margin-bottom:10px;">Firmas</h3>';
+  html += signatureBlock("sigFormador", "Firma del formador");
+  html += '<div style="height:14px;"></div>';
+  html += signatureBlock("sigResponsable", "Firma del responsable del centro");
+  html += "</div>";
+
   el.innerHTML = html;
   bindNewView();
   updateSummary();
+  initSignaturePad("sigFormador");
+  initSignaturePad("sigResponsable");
+}
+
+function signatureBlock(id, label) {
+  return `
+    <div class="sig-row"><span class="sig-label">${label}</span>
+      <button type="button" class="btn btn-ghost btn-sm" data-clear="${id}">Borrar</button>
+    </div>
+    <div class="sigwrap" id="${id}_wrap">
+      <span class="ph" id="${id}_ph">Firma aquí</span>
+      <canvas id="${id}"></canvas>
+    </div>`;
+}
+
+const signaturePads = {};
+function initSignaturePad(id) {
+  const canvas = document.getElementById(id);
+  const wrap = document.getElementById(id + "_wrap");
+  const ph = document.getElementById(id + "_ph");
+  const ctx = canvas.getContext("2d");
+  const ratio = window.devicePixelRatio || 1;
+  function resize() {
+    const rect = wrap.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = 130 * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.strokeStyle = "#1C2340";
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }
+  resize();
+  let drawing = false, has = false;
+  let last = null;
+
+  function pos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+  }
+  function start(e) {
+    e.preventDefault();
+    drawing = true; has = true;
+    ph.style.display = "none";
+    last = pos(e);
+  }
+  function move(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last = p;
+  }
+  function end() { drawing = false; }
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", end);
+  canvas.addEventListener("touchstart", start, { passive: false });
+  canvas.addEventListener("touchmove", move, { passive: false });
+  canvas.addEventListener("touchend", end);
+
+  document.querySelector(`[data-clear="${id}"]`).onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    has = false;
+    ph.style.display = "block";
+  };
+
+  signaturePads[id] = { canvas, hasSignature: () => has };
+}
+
+function getSignatureDataURL(id) {
+  const pad = signaturePads[id];
+  if (!pad || !pad.hasSignature()) return null;
+  return pad.canvas.toDataURL("image/png");
 }
 
 function field(id, label, type, required) {
@@ -452,6 +575,8 @@ async function saveChecklist() {
     valoracion: state.valoracion || (pct === null ? "Sin evaluar" : pct >= 90 ? "Correcto" : pct >= 70 ? "Mejorable" : "Requiere acción inmediata"),
     acciones: document.getElementById("acciones").value.trim(),
     detail,
+    firmaFormador: getSignatureDataURL("sigFormador"),
+    firmaResponsable: getSignatureDataURL("sigResponsable"),
     guardadoEn: new Date().toISOString(),
   };
 
@@ -535,6 +660,10 @@ function renderEntries(records) {
     const detailRows = r.detail.map(d =>
       `<div class="di"><b>${d.item}</b> — ${d.valor.toUpperCase()}${d.obs ? " · " + d.obs : ""}</div>`
     ).join("");
+    const sigRow = (r.firmaFormador || r.firmaResponsable) ? `<div class="di" style="border-top:none;padding-top:10px;">
+        ${r.firmaFormador ? '<img src="'+r.firmaFormador+'" alt="Firma formador" style="height:40px;border:1px solid var(--line);border-radius:6px;margin-right:8px;background:#fff;">' : ''}
+        ${r.firmaResponsable ? '<img src="'+r.firmaResponsable+'" alt="Firma responsable" style="height:40px;border:1px solid var(--line);border-radius:6px;background:#fff;">' : ''}
+      </div>` : "";
     return `<div class="entry" data-id="${r.id}">
       <div class="entry-top">
         <div>
@@ -544,7 +673,7 @@ function renderEntries(records) {
         <span class="badge ${badgeClass}">${r.pct === null ? "—" : r.pct + "%"}</span>
       </div>
       <div class="entry-meta">Sí: ${r.si} · No: ${r.no} · N/A: ${r.na}${r.acciones ? " · Acciones: " + r.acciones : ""}</div>
-      <div class="entry-detail">${detailRows}</div>
+      <div class="entry-detail">${detailRows}${sigRow}</div>
     </div>`;
   }).join("");
   wrap.querySelectorAll(".entry").forEach(e => {
@@ -569,13 +698,108 @@ function exportCSV(records) {
 // ---------- tabs ----------
 document.getElementById("tabNewBtn").onclick = () => switchTab("new");
 document.getElementById("tabHistBtn").onclick = () => switchTab("hist");
+document.getElementById("tabAgendaBtn").onclick = () => switchTab("agenda");
 function switchTab(tab) {
   document.getElementById("tabNewBtn").classList.toggle("active", tab === "new");
   document.getElementById("tabHistBtn").classList.toggle("active", tab === "hist");
+  document.getElementById("tabAgendaBtn").classList.toggle("active", tab === "agenda");
   document.getElementById("viewNew").style.display = tab === "new" ? "block" : "none";
   document.getElementById("viewHist").style.display = tab === "hist" ? "block" : "none";
+  document.getElementById("viewAgenda").style.display = tab === "agenda" ? "block" : "none";
   document.getElementById("saveBar").style.display = tab === "new" ? "flex" : "none";
   if (tab === "hist") renderHist();
+  if (tab === "agenda") renderAgenda();
+}
+
+// ---------- Mi agenda ----------
+let agendaCache = null;
+const FORMADORES = ["Cristian", "Javier", "Hugo", "Iñaki", "Pendiente de asignar"];
+const MES_NOMBRE = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+async function loadAgendaData() {
+  if (agendaCache) return agendaCache;
+  const res = await fetch("agenda_data.json");
+  agendaCache = await res.json();
+  return agendaCache;
+}
+
+async function renderAgenda() {
+  const el = document.getElementById("viewAgenda");
+  const savedFormador = localStorage.getItem("agenda_formador") || FORMADORES[0];
+  el.innerHTML = `
+    <div class="card">
+      <label class="field" style="margin-bottom:8px;">¿Quién eres?</label>
+      <div class="formador-select" id="formadorSelect">
+        ${FORMADORES.map(f => `<button data-f="${f}" class="${f === savedFormador ? "on" : ""}">${f}</button>`).join("")}
+      </div>
+    </div>
+    <div id="agendaBody"><div class="loading">Cargando agenda…</div></div>
+  `;
+  document.querySelectorAll("#formadorSelect button").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll("#formadorSelect button").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+      localStorage.setItem("agenda_formador", btn.dataset.f);
+      drawAgendaBody(btn.dataset.f);
+    };
+  });
+  drawAgendaBody(savedFormador);
+}
+
+async function drawAgendaBody(formador) {
+  const body = document.getElementById("agendaBody");
+  body.innerHTML = '<div class="loading">Cargando agenda…</div>';
+  let data;
+  try {
+    data = await loadAgendaData();
+  } catch (e) {
+    body.innerHTML = '<div class="empty">No se pudo cargar la agenda (agenda_data.json). Comprueba que el archivo está subido junto al resto de la app.</div>';
+    return;
+  }
+  const mine = data.filter(s => s.zona === formador && s.fecha).sort((a, b) => a.fecha.localeCompare(b.fecha));
+  if (!mine.length) {
+    body.innerHTML = '<div class="empty">No hay sesiones asignadas todavía para esta zona.</div>';
+    return;
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = mine.filter(s => s.fecha >= today);
+  const next = upcoming[0] || mine[mine.length - 1];
+  const totalCiudades = new Set(mine.map(s => s.cluster)).size;
+
+  let html = "";
+  if (next) {
+    const d = new Date(next.fecha + "T00:00:00");
+    const dstr = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+    html += `<div class="next-session">
+      <div class="tag">${upcoming.length ? "Próxima sesión" : "Última sesión programada"}</div>
+      <div class="d">${dstr}</div>
+      <div class="s">${next.turno} · ${next.cluster} · ${next.tipo}: ${next.area}</div>
+    </div>`;
+  }
+  html += `<div class="agenda-stats">
+    <div class="stat"><div class="n">${mine.length}</div><div class="l">Sesiones</div></div>
+    <div class="stat"><div class="n">${totalCiudades}</div><div class="l">Sedes</div></div>
+    <div class="stat"><div class="n">${upcoming.length}</div><div class="l">Pendientes</div></div>
+  </div>`;
+
+  let lastMonth = "";
+  mine.forEach(s => {
+    const d = new Date(s.fecha + "T00:00:00");
+    const monthKey = MES_NOMBRE[d.getMonth()] + " " + d.getFullYear();
+    if (monthKey !== lastMonth) {
+      html += `<div class="agenda-month">${monthKey}</div>`;
+      lastMonth = monthKey;
+    }
+    const dstr = d.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+    const cls = s.tipo === "Administrativa" ? "admin" : "";
+    html += `<div class="agenda-item ${cls}">
+      <div class="row1"><span class="date">${dstr}</span><span class="turno">${s.turno}</span></div>
+      <div class="area">${s.tipo}: ${s.area}</div>
+      <div class="meta">${s.cluster} · ${s.n_tecnicos} técnico(s) · ${s.fase}</div>
+      <div class="tecs">${s.tecnicos}</div>
+    </div>`;
+  });
+  body.innerHTML = html;
 }
 
 document.getElementById("saveBtn").onclick = saveChecklist;
