@@ -1,0 +1,1501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Checklist Orden y Limpieza · Red Ralarsa</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#093A33">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Checklist Ralarsa">
+<link rel="icon" href="icon-192.png">
+<style>
+  :root{
+    --navy:#093A33;
+    --navy-dark:#062824;
+    --ice:#98FF84;
+    --ice-soft:#E9F9E2;
+    --bg:#F3F8F4;
+    --card:#FFFFFF;
+    --line:#D8EAE0;
+    --text:#16241F;
+    --muted:#5D7A6C;
+    --green:#2E9E52;
+    --green-bg:#E6F6EA;
+    --red:#B3261E;
+    --red-bg:#FCEAE9;
+    --amber:#8A5A00;
+    --amber-bg:#FDF3DF;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;
+    background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:Georgia,"Times New Roman",serif; margin:0;}
+  .app{max-width:760px; margin:0 auto; padding-bottom:110px;}
+
+  header.top{
+    background:var(--navy); color:#fff; padding:18px 20px 18px;
+    position:sticky; top:0; z-index:20;
+  }
+  .brand-logo{height:26px; display:block; margin-bottom:12px;}
+  header.top h1{font-size:19px; font-weight:700; letter-spacing:.2px;}
+  header.top p{margin:4px 0 0; font-size:12.5px; color:var(--ice); opacity:.95;}
+  .modebadge{display:inline-block; margin-top:8px; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:700;}
+  .modebadge.cloud{background:rgba(152,255,132,.22); color:var(--ice);}
+  .modebadge.local{background:rgba(255,193,7,.22); color:#FFE08A;}
+
+  nav.tabs{display:flex; gap:6px; padding:12px 20px 0;}
+  nav.tabs button{
+    flex:1; padding:10px 8px; border:none; border-radius:10px 10px 0 0;
+    background:rgba(255,255,255,.12); color:#fff; font-size:13.5px; font-weight:600;
+    cursor:pointer; opacity:.75;
+  }
+  nav.tabs button.active{background:var(--bg); color:var(--navy); opacity:1;}
+
+  main{padding:18px 16px 0;}
+  .card{
+    background:var(--card); border:1px solid var(--line); border-radius:var(--radius);
+    padding:16px; margin-bottom:14px;
+  }
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  @media (max-width:520px){ .grid2{grid-template-columns:1fr;} }
+
+  label.field{display:block; font-size:12.5px; font-weight:600; color:var(--muted); margin-bottom:4px;}
+  input[type=text], input[type=date], select, textarea{
+    width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:8px;
+    font-size:14.5px; font-family:inherit; color:var(--text); background:#fff;
+  }
+  input:focus, select:focus, textarea:focus{outline:2px solid var(--navy); outline-offset:1px;}
+  .fieldwrap{margin-bottom:10px;}
+
+  .section-head{
+    display:flex; align-items:center; justify-content:space-between; cursor:pointer;
+    padding:2px 0;
+  }
+  .section-head h3{font-size:16px; color:var(--navy);}
+  .section-head .count{font-size:12px; color:var(--muted); font-family:-apple-system,sans-serif; font-weight:600;}
+  .section-note{font-size:12px; color:var(--muted); font-style:italic; margin:4px 0 10px;}
+  .chev{transition:transform .15s ease; color:var(--navy); font-size:13px;}
+  .section.collapsed .chev{transform:rotate(-90deg);}
+  .section.collapsed .items{display:none;}
+
+  .item{border-top:1px solid var(--line); padding:12px 0;}
+  .item:first-of-type{border-top:none;}
+  .item-text{font-size:14px; margin-bottom:8px; line-height:1.35;}
+  .seg{display:flex; gap:6px; margin-bottom:8px;}
+  .seg button{
+    flex:1; padding:8px 4px; border:1.5px solid var(--line); background:#fff;
+    border-radius:8px; font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .seg button[data-v="si"].on{background:var(--green-bg); border-color:var(--green); color:var(--green);}
+  .seg button[data-v="no"].on{background:var(--red-bg); border-color:var(--red); color:var(--red);}
+  .seg button[data-v="na"].on{background:var(--ice-soft); border-color:var(--navy); color:var(--navy);}
+  .obs{width:100%; font-size:13px; padding:7px 9px;}
+  .obs-row{display:flex; gap:8px; align-items:center;}
+  .obs-row .obs{flex:1;}
+  .photo-btn{
+    flex-shrink:0; width:38px; height:38px; border-radius:8px; border:1.5px solid var(--line);
+    background:#fff; display:flex; align-items:center; justify-content:center; font-size:17px;
+    cursor:pointer; position:relative;
+  }
+  .photo-btn.has{background:var(--ice-soft); border-color:var(--navy);}
+  .photo-btn input{position:absolute; inset:0; opacity:0; width:100%; height:100%; cursor:pointer;}
+  .item-photo{margin-top:8px;}
+  .item-photo img{max-height:90px; border-radius:8px; border:1px solid var(--line); display:block;}
+  .item-photo .rm-photo{margin-top:4px; background:none; border:none; color:var(--red); font-size:11.5px; font-weight:700; cursor:pointer; padding:0;}
+
+  .progress-bar{height:6px; background:var(--line); border-radius:4px; overflow:hidden; margin-top:8px;}
+  .progress-bar > div{height:100%; background:var(--navy); transition:width .2s ease;}
+
+  .summary-row{display:flex; gap:12px; flex-wrap:wrap; margin-top:6px;}
+  .stat{flex:1; min-width:90px; background:var(--ice-soft); border-radius:10px; padding:10px 12px; text-align:center;}
+  .stat .n{font-size:20px; font-weight:700; color:var(--navy); font-family:Georgia,serif;}
+  .stat .l{font-size:10.5px; color:var(--muted); text-transform:uppercase; letter-spacing:.4px;}
+  .stat-btn{cursor:pointer; border:1.5px solid transparent; transition:transform .1s ease;}
+  .stat-btn:active{transform:scale(.97);}
+  .stat-btn.on{background:var(--navy); border-color:var(--navy);}
+  .stat-btn.on .n, .stat-btn.on .l{color:#fff;}
+
+  .valoracion{display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;}
+  .valoracion button{
+    padding:9px 14px; border-radius:20px; border:1.5px solid var(--line); background:#fff;
+    font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .valoracion button.on[data-v="Correcto"]{background:var(--green-bg); border-color:var(--green); color:var(--green);}
+  .valoracion button.on[data-v="Mejorable"]{background:var(--amber-bg); border-color:var(--amber); color:var(--amber);}
+  .valoracion button.on[data-v="Requiere acción inmediata"]{background:var(--red-bg); border-color:var(--red); color:var(--red);}
+
+  .savebar{
+    position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line);
+    padding:12px 16px calc(12px + env(safe-area-inset-bottom)); z-index:30;
+    display:flex; gap:10px; align-items:center; max-width:760px; margin:0 auto;
+  }
+  .savebar .msg{flex:1; font-size:12px; color:var(--muted);}
+  .btn{
+    padding:12px 20px; border-radius:10px; border:none; font-size:14.5px; font-weight:700;
+    cursor:pointer; font-family:inherit;
+  }
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:disabled{background:#B7BEDB; cursor:default;}
+  .btn-ghost{background:var(--ice-soft); color:var(--navy);}
+  .btn-sm{padding:7px 12px; font-size:12.5px; border-radius:8px;}
+
+  .notice{
+    background:var(--ice-soft); border:1px solid var(--ice); border-radius:10px;
+    padding:10px 12px; font-size:12px; color:var(--navy); margin:14px 16px 0; line-height:1.4;
+  }
+
+  /* Historico */
+  .hist-toolbar{display:flex; gap:8px; margin-bottom:12px;}
+  .hist-toolbar select, .hist-toolbar input{flex:1;}
+  .entry{
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px;
+    margin-bottom:10px; cursor:pointer;
+  }
+  .entry-top{display:flex; justify-content:space-between; align-items:flex-start; gap:10px;}
+  .entry-top .c{font-weight:700; font-size:15px; color:var(--navy);}
+  .entry-top .d{font-size:12px; color:var(--muted); margin-top:2px;}
+  .badge{padding:4px 10px; border-radius:20px; font-size:11.5px; font-weight:700; white-space:nowrap;}
+  .badge.ok{background:var(--green-bg); color:var(--green);}
+  .badge.warn{background:var(--amber-bg); color:var(--amber);}
+  .badge.bad{background:var(--red-bg); color:var(--red);}
+  .entry-meta{font-size:12px; color:var(--muted); margin-top:8px;}
+  .entry-detail{display:none; margin-top:12px; border-top:1px solid var(--line); padding-top:10px;}
+  .entry.open .entry-detail{display:block;}
+  .entry-detail .di{font-size:12.5px; padding:5px 0; border-top:1px solid var(--line);}
+  .entry-detail .di:first-child{border-top:none;}
+  .empty{text-align:center; color:var(--muted); font-size:13.5px; padding:40px 20px;}
+  .loading{text-align:center; color:var(--muted); font-size:13px; padding:20px;}
+
+  /* Mi agenda */
+  .formador-select{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:4px;}
+  .formador-select button{
+    padding:9px 14px; border-radius:20px; border:1.5px solid var(--line); background:#fff;
+    font-size:13px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .formador-select button.on{background:var(--navy); border-color:var(--navy); color:#fff;}
+  .next-session{
+    background:linear-gradient(135deg, var(--navy), #0F5C4D); color:#fff; border-radius:14px;
+    padding:16px; margin:14px 0;
+  }
+  .next-session .tag{font-size:11px; text-transform:uppercase; letter-spacing:.5px; color:var(--ice); font-weight:700;}
+  .next-session .d{font-size:22px; font-family:Georgia,serif; font-weight:700; margin:4px 0 2px;}
+  .next-session .s{font-size:13px; color:#DCE4FA;}
+  .agenda-month{font-size:12.5px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:.4px; margin:16px 4px 6px;}
+  .agenda-item{
+    background:var(--card); border:1px solid var(--line); border-left:6px solid var(--navy); border-radius:10px;
+    padding:11px 13px 11px 12px; margin-bottom:9px;
+  }
+  .agenda-item.tecnica{border-left-color:#C0392B; background:#FDF3F2;}
+  .agenda-item.booking{border-left-color:#C08A00; background:#FDF8EC;}
+  .agenda-item.comercial{border-left-color:#2E75B6; background:#EEF5FB;}
+  .pq-badge{
+    display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:800;
+    letter-spacing:.3px; margin-bottom:6px; color:#fff;
+  }
+  .pq-badge.tecnica{background:#C0392B;}
+  .pq-badge.booking{background:#C08A00;}
+  .pq-badge.comercial{background:#2E75B6;}
+  .agenda-legend{display:flex; gap:14px; flex-wrap:wrap; margin:2px 0 12px; font-size:11.5px; color:var(--muted);}
+  .agenda-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .agenda-legend i{width:10px; height:10px; border-radius:3px; display:inline-block;}
+  .agenda-item .row1{display:flex; justify-content:space-between; align-items:baseline; gap:8px;}
+  .agenda-item .date{font-weight:700; font-size:13.5px; color:var(--navy);}
+  .agenda-item .turno{font-size:11.5px; color:var(--muted);}
+  .agenda-item .area{font-size:13.5px; margin-top:3px;}
+  .agenda-item .meta{font-size:12px; color:var(--muted); margin-top:4px;}
+  .agenda-item .tecs{font-size:11.5px; color:var(--muted); margin-top:5px; line-height:1.4;}
+  .agenda-item{cursor:pointer; position:relative;}
+  .agenda-item .signed-badge{
+    position:absolute; top:11px; right:13px; background:var(--green-bg); color:var(--green);
+    font-size:10.5px; font-weight:700; padding:3px 8px; border-radius:10px;
+  }
+  .agenda-stats{display:flex; gap:10px; margin:10px 0;}
+
+  /* firma */
+  .sigwrap{border:1.5px dashed var(--line); border-radius:10px; background:#fbfbfd; position:relative;}
+  .sigwrap canvas{width:100%; height:130px; display:block; touch-action:none;}
+  .sigwrap .ph{position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); font-size:12px; color:#B7BEDB; pointer-events:none;}
+  .sig-row{display:flex; justify-content:space-between; align-items:center; margin-top:6px;}
+  .sig-label{font-size:12.5px; font-weight:600; color:var(--muted);}
+
+  /* modal de sesion */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(20,24,50,.55); z-index:50;
+    display:flex; align-items:flex-end; justify-content:center;
+  }
+  .modal-sheet{
+    background:var(--bg); width:100%; max-width:760px; max-height:92vh; overflow-y:auto;
+    border-radius:18px 18px 0 0; padding:8px 16px calc(18px + env(safe-area-inset-bottom));
+  }
+  .modal-sheet h2{font-size:18px; color:var(--navy); margin-bottom:2px;}
+  .modal-sheet .sub{font-size:12.5px; color:var(--muted); margin-bottom:14px;}
+  .modal-close{position:sticky; top:0; text-align:right; margin-bottom:4px; background:var(--bg); padding-top:8px;}
+  .modal-close button{background:none; border:none; font-size:22px; color:var(--muted); cursor:pointer; padding:4px 8px;}
+  .filelist{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
+  .fileitem{
+    display:flex; align-items:center; gap:10px; background:#fff; border:1px solid var(--line);
+    border-radius:10px; padding:8px 10px;
+  }
+  .fileitem img{width:40px; height:40px; object-fit:cover; border-radius:6px; flex-shrink:0;}
+  .fileitem .fname{flex:1; font-size:12.5px; word-break:break-word;}
+  .fileitem .frm{background:none; border:none; color:var(--red); font-size:12px; cursor:pointer; font-weight:700;}
+  .filepicker{
+    display:block; text-align:center; padding:16px; border:1.5px dashed var(--line); border-radius:10px;
+    color:var(--navy); font-size:13px; font-weight:600; cursor:pointer; background:#fbfbfd;
+  }
+  .filepicker input{display:none;}
+  .modal-savebar{display:flex; gap:10px; margin-top:16px;}
+  .modal-savebar .btn{flex:1;}
+  .sesion-msg{font-size:12px; color:var(--muted); margin-top:8px; text-align:center;}
+  .reprog-row{display:flex; gap:8px; margin-top:8px;}
+  .reprog-row input[type=date]{flex:1;}
+  .turno-select{display:flex; gap:8px;}
+  .turno-select button{
+    flex:1; padding:9px 6px; border-radius:8px; border:1.5px solid var(--line); background:#fff;
+    font-size:12.5px; font-weight:600; color:var(--muted); cursor:pointer;
+  }
+  .turno-select button.on{background:var(--ice-soft); border-color:var(--navy); color:var(--navy);}
+  .reprog-badge{
+    display:inline-block; margin-left:8px; background:var(--amber-bg); color:var(--amber);
+    font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:10px; vertical-align:middle;
+  }
+  .tec-row{padding:8px 0; border-top:1px solid var(--line);}
+  .tec-row:first-child{border-top:none; padding-top:0;}
+  .tec-name{font-size:13px; font-weight:700; color:var(--text);}
+  .tec-city{font-weight:400; color:var(--muted); font-size:12px;}
+  .tec-areas{display:flex; flex-wrap:wrap; gap:5px; margin-top:5px;}
+  .area-chip{font-size:11px; font-weight:600; padding:3px 8px; border-radius:20px; border:1px solid; white-space:nowrap;}
+
+  /* login */
+  .login-overlay{
+    position:fixed; inset:0; background:var(--navy); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .login-card{background:#fff; border-radius:16px; padding:28px 24px; width:100%; max-width:360px;}
+  .login-card img{height:30px; display:block; margin:0 auto 18px;}
+  .login-card h2{font-size:18px; color:var(--navy); text-align:center; margin-bottom:4px; font-family:Georgia,serif;}
+  .login-card p{font-size:12.5px; color:var(--muted); text-align:center; margin-bottom:20px;}
+  .login-card label{font-size:12.5px; font-weight:600; color:var(--muted); display:block; margin-bottom:5px;}
+  .login-card select, .login-card input{
+    width:100%; padding:11px 12px; border:1.5px solid var(--line); border-radius:9px;
+    font-size:15px; margin-bottom:14px; font-family:inherit;
+  }
+  .login-card button{
+    width:100%; padding:12px; border:none; border-radius:9px; background:var(--navy); color:#fff;
+    font-size:15px; font-weight:700; cursor:pointer;
+  }
+  .login-error{color:var(--red); font-size:12.5px; text-align:center; margin-top:10px; min-height:16px;}
+  .logout-link{
+    position:absolute; top:16px; right:16px; font-size:11px; color:var(--ice); opacity:.85;
+    text-decoration:underline; cursor:pointer; background:none; border:none;
+  }
+</style>
+</head>
+<body>
+<div class="login-overlay" id="loginOverlay">
+  <div class="login-card">
+    <img src="ralarsa-logo.png" alt="Ralarsa" style="filter:invert(1) brightness(0.3);">
+    <h2>Acceso al plan de formación</h2>
+    <p>Selecciona tu usuario e introduce tu contraseña</p>
+    <label for="loginUser">Usuario</label>
+    <select id="loginUser">
+      <option value="responsable">Responsable de formación</option>
+      <option value="cristian">Cristian</option>
+      <option value="javier">Javier</option>
+      <option value="hugo">Hugo</option>
+      <option value="inaki">Iñaki</option>
+      <option value="pendiente">Pendiente de asignar</option>
+    </select>
+    <label for="loginPass">Contraseña</label>
+    <input type="password" id="loginPass" placeholder="••••••••">
+    <button id="loginBtn">Entrar</button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+<div class="app" style="visibility:hidden;">
+  <header class="top">
+    <button class="logout-link" id="logoutBtn">Cerrar sesión</button>
+    <img src="ralarsa-logo.png" alt="Ralarsa" class="brand-logo">
+    <h1 id="pageTitle">Mi agenda</h1>
+    <p>Plan de Formación · Red Técnica Ralarsa</p>
+    <span class="modebadge" id="modeBadge"></span>
+    <nav class="tabs">
+      <button id="tabAgendaBtn" class="active">Mi agenda</button>
+      <button id="tabTecnicosBtn">Técnicos</button>
+      <button id="tabNewBtn">Nuevo checklist</button>
+      <button id="tabHistBtn">Histórico</button>
+    </nav>
+  </header>
+
+  <main id="viewAgenda"></main>
+  <main id="viewTecnicos" style="display:none;"></main>
+  <main id="viewNew" style="display:none;"></main>
+  <main id="viewHist" style="display:none;"></main>
+
+  <div class="notice" id="storageNotice">
+    Los registros se guardan en un espacio compartido de esta app: cualquier persona de RRHH o formación operativa que la abra puede verlos y descargarlos. No es (todavía) una carpeta de red — usa "Exportar CSV" en Histórico para subirlo manualmente a la carpeta compartida.
+  </div>
+</div>
+
+<div class="savebar" id="saveBar" style="display:none;">
+  <div class="msg" id="saveMsg">Completa los datos del centro para guardar.</div>
+  <button class="btn btn-primary" id="saveBtn" disabled>Guardar checklist</button>
+</div>
+
+<script>
+// ---------- autenticacion ----------
+// Control de acceso pensado para un equipo interno pequeño: contraseñas con hash SHA-256,
+// no es seguridad de nivel empresarial (el codigo es visible en el navegador), pero evita
+// que cada formador vea las agendas o datos de los demas por error o curiosidad.
+const CREDENTIALS = {
+  responsable: { hash: "ad97114fa6b9283c34aa52675ab56fff475d206da1cfd33ad10ef1a5f3048e0e", role: "admin", nombre: "Responsable de formación" },
+  cristian:    { hash: "5b3cb911eb3ac7a779b18ebd011dfe87b4a7c5b64bfc501d913006bb7984e017", role: "formador", zona: "Cristian" },
+  javier:      { hash: "b505981b4b1c56908b27d6de3687fad6d6ff9d9ba9a016f010e99dc32ecd47d8", role: "formador", zona: "Javier" },
+  hugo:        { hash: "c64af887d9674ca8412b190b24d2f6832f26bd793741b8950ee0fdef607ecf29", role: "formador", zona: "Hugo" },
+  inaki:       { hash: "1be312af74e49d85cc22939a627520c162f7dc16019e6b34e5f82263c78588e2", role: "formador", zona: "Iñaki" },
+  pendiente:   { hash: "7fab95d397ced48793827cbaf8c2cfc2c4aeb80c72f6199aa0853834ccee992f", role: "formador", zona: "Pendiente de asignar" },
+};
+
+async function sha256(text) {
+  const enc = new TextEncoder().encode(text);
+  const buf = await crypto.subtle.digest("SHA-256", enc);
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function getSession() {
+  try { return JSON.parse(localStorage.getItem("auth_session") || "null"); } catch (e) { return null; }
+}
+
+function applyRole(session) {
+  const isAdmin = session.role === "admin";
+  // las 3 pestañas quedan visibles para todos; lo que cambia es el contenido que ve cada uno
+  document.getElementById("tabNewBtn").style.display = "";
+  document.getElementById("tabHistBtn").style.display = "";
+  if (!isAdmin) {
+    localStorage.setItem("agenda_formador", session.zona);
+  }
+}
+
+async function doLogin() {
+  const user = document.getElementById("loginUser").value;
+  const pass = document.getElementById("loginPass").value;
+  const errEl = document.getElementById("loginError");
+  const cred = CREDENTIALS[user];
+  if (!cred) { errEl.textContent = "Usuario no reconocido."; return; }
+  const hash = await sha256(pass);
+  if (hash !== cred.hash) { errEl.textContent = "Contraseña incorrecta."; return; }
+  const session = { user, role: cred.role, zona: cred.zona || null, nombre: cred.nombre || cred.zona };
+  localStorage.setItem("auth_session", JSON.stringify(session));
+  errEl.textContent = "";
+  startApp(session);
+}
+
+function doLogout() {
+  localStorage.removeItem("auth_session");
+  document.getElementById("loginOverlay").style.display = "flex";
+  document.querySelector(".app").style.visibility = "hidden";
+  document.getElementById("loginPass").value = "";
+}
+
+function startApp(session) {
+  document.getElementById("loginOverlay").style.display = "none";
+  document.querySelector(".app").style.visibility = "visible";
+  applyRole(session);
+  renderNew();
+  renderAgenda();
+}
+
+document.getElementById("loginBtn").onclick = doLogin;
+document.getElementById("loginPass").addEventListener("keydown", (e) => { if (e.key === "Enter") doLogin(); });
+document.getElementById("logoutBtn").onclick = doLogout;
+
+</script>
+<script>
+// ---------- capa de almacenamiento hibrida ----------
+// Dentro de Claude (artefacto): usa window.storage, compartido entre quien abra el mismo artefacto.
+// Instalada como app independiente (PWA fuera de Claude): usa localStorage, guardado solo en este dispositivo.
+const CLOUD = !!(window.storage && window.storage.set);
+
+async function storageSet(key, value, shared) {
+  if (CLOUD) return window.storage.set(key, value, shared);
+  localStorage.setItem(key, value);
+  return { key, value };
+}
+async function storageGet(key, shared) {
+  if (CLOUD) return window.storage.get(key, shared);
+  const v = localStorage.getItem(key);
+  if (v === null) throw new Error("not found");
+  return { key, value: v };
+}
+async function storageList(prefix, shared) {
+  if (CLOUD) return window.storage.list(prefix, shared);
+  const keys = Object.keys(localStorage).filter((k) => k.startsWith(prefix));
+  return { keys };
+}
+async function storageDelete(key, shared) {
+  if (CLOUD) return window.storage.delete(key, shared);
+  localStorage.removeItem(key);
+  return { key, deleted: true };
+}
+
+// registro de service worker (solo tiene efecto si la app está alojada en un dominio propio, no dentro de Claude)
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("sw.js").catch(() => {});
+  });
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  const badge = document.getElementById("modeBadge");
+  const notice = document.getElementById("storageNotice");
+  if (CLOUD) {
+    badge.textContent = "● Modo compartido (vía Claude)";
+    badge.className = "modebadge cloud";
+    notice.textContent = 'Los registros se guardan en un espacio compartido de este artefacto: cualquier persona de RRHH o formación operativa que lo abra en Claude ve el mismo histórico. Usa "Exportar CSV" en Histórico para subirlo a la carpeta de red.';
+  } else {
+    badge.textContent = "● Modo local (solo este dispositivo)";
+    badge.className = "modebadge local";
+    notice.textContent = 'Esta app está instalada de forma independiente: los checklists se guardan solo en este teléfono. Usa "Exportar CSV" en Histórico después de cada visita y súbelo a la carpeta compartida de RRHH / formación operativa.';
+  }
+});
+</script>
+<script>
+const SECTIONS = [
+  { title: "1. Zonas comunes", items: [
+    "Baño / aseo: limpio, con papel, jabón y papelera vacía",
+    "Duchas y vestuarios (si los hay): limpios, sin humedad ni malos olores",
+    "Taquillas: cerradas, sin objetos fuera de lugar",
+    "Sala de descanso / office: mesas limpias, nevera y menaje en orden",
+    "Recepción / zona de atención al cliente: presentable, sin cajas fuera de sitio",
+  ]},
+  { title: "2. Oficina / administración", items: [
+    "Mesas y escritorios despejados de material ajeno al trabajo diario",
+    "Documentación archivada (no apilada suelta ni fuera de carpetas)",
+    "Cableado de equipos recogido y sin riesgo de tropiezo",
+    "Papeleras vaciadas y zona general sin acumulación de papel",
+  ]},
+  { title: "3. Almacenamiento / stock", items: [
+    "Estanterías ordenadas, con material apilado de forma estable",
+    "Referencias etiquetadas y localizables",
+    "Productos químicos / peligrosos separados, señalizados y con ficha de seguridad accesible",
+    "Sin stock caducado, dañado o depositado directamente en el suelo",
+    "Pasillos de almacén libres de obstáculos",
+  ]},
+  { title: "4. Banco de trabajo / zona técnica", items: [
+    "Superficie de trabajo despejada al terminar cada intervención",
+    "Herramientas ordenadas en su ubicación (panel, carro o cajonera)",
+    "Sin restos de material, virutas o residuos acumulados",
+    "Equipos y máquinas (pulidora, laminadora, etc.) limpios tras su uso",
+  ]},
+  { title: "5. Taller / bahías de reparación", items: [
+    "Suelo limpio, sin manchas de aceite, grasa o líquidos derramados",
+    "Señalización de seguridad visible y en buen estado",
+    "Contenedores de residuos correctamente separados (vidrio, plástico, químicos)",
+    "EPIs (guantes, gafas, mascarillas) disponibles, visibles y en buen estado",
+    "Extintores accesibles, con cartel identificativo y revisión en vigor",
+  ]},
+  { title: "6. Exterior / entrada / imagen de marca", items: [
+    "Fachada y rótulo del centro en buen estado",
+    "Zona de acceso y aparcamiento de vehículos despejada",
+    "Contenedores exteriores tapados, sin residuos alrededor",
+    "Imagen general del centro acorde a la identidad de marca Ralarsa",
+  ]},
+  { title: "7. Furgoneta Unidad Móvil", note: "Si el centro no dispone de Unidad Móvil, marca todos los ítems como N/A.", items: [
+    "Interior de la furgoneta limpio y ordenado, sin residuos ni objetos sueltos",
+    "Material y herramienta a bordo colocados en su ubicación fija",
+    "Exterior del vehículo limpio y rotulación en buen estado",
+    "ITV en vigor (comprobar fecha en la ficha técnica)",
+    "Documentación del vehículo presente (permiso de circulación, seguro)",
+  ]},
+  { title: "8. Equipo de calibración", items: [
+    "Ordenador portátil de calibración con el software actualizado a la última versión",
+    "Equipo de diagnosis: estado físico correcto, sin daños ni conexiones deterioradas",
+    "Soporte / carro de calibración: estable, ruedas y anclajes en buen estado",
+    "Paneles de calibración: sin golpes, limpios y correctamente almacenados",
+    "Calibración del propio equipo en vigor (fecha de última verificación)",
+  ]},
+];
+
+let state = { items: {}, valoracion: null };
+SECTIONS.forEach((s, si) => s.items.forEach((_, ii) => { state.items[si + "_" + ii] = { v: null, obs: "", foto: null }; }));
+
+// ---------- render: Nuevo checklist ----------
+function renderNew() {
+  const el = document.getElementById("viewNew");
+  let html = "";
+  html += '<div class="card">';
+  html += '<div class="grid2">';
+  html += field("centro", "Centro", "text", true);
+  html += field("ciudad", "Ciudad / Provincia", "text", false);
+  html += field("fecha", "Fecha de la visita", "date", true);
+  html += field("formador", "Formador", "text", true);
+  html += field("responsable", "Responsable del centro", "text", false);
+  html += field("visitaAnterior", "Visita anterior (fecha)", "date", false);
+  html += "</div></div>";
+
+  SECTIONS.forEach((s, si) => {
+    html += `<div class="card section" id="sec_${si}">`;
+    html += `<div class="section-head" data-si="${si}">
+        <h3>${s.title}</h3>
+        <span class="count" id="cnt_${si}"></span>
+        <span class="chev">▾</span>
+      </div>`;
+    if (s.note) html += `<div class="section-note">${s.note}</div>`;
+    html += '<div class="items">';
+    s.items.forEach((text, ii) => {
+      const key = si + "_" + ii;
+      html += `<div class="item">
+        <div class="item-text">${text}</div>
+        <div class="seg" data-key="${key}">
+          <button data-v="si">Sí</button>
+          <button data-v="no">No</button>
+          <button data-v="na">N/A</button>
+        </div>
+        <div class="obs-row">
+          <input class="obs" type="text" placeholder="Observaciones (opcional)" data-obs="${key}">
+          <label class="photo-btn" data-photo-btn="${key}">📷
+            <input type="file" accept="image/*" data-photo-input="${key}">
+          </label>
+        </div>
+        <div class="item-photo" id="photo_${key}"></div>
+      </div>`;
+    });
+    html += "</div></div>";
+  });
+
+  html += '<div class="card">';
+  html += '<h3 style="font-size:16px;color:var(--navy);margin-bottom:6px;">Resumen de la visita</h3>';
+  html += '<div class="summary-row">';
+  html += '<div class="stat"><div class="n" id="stSi">0</div><div class="l">Sí</div></div>';
+  html += '<div class="stat"><div class="n" id="stNo">0</div><div class="l">No</div></div>';
+  html += '<div class="stat"><div class="n" id="stPct">—</div><div class="l">% correcto</div></div>';
+  html += '</div>';
+  html += '<div class="progress-bar"><div id="progFill" style="width:0%"></div></div>';
+  html += '<div class="valoracion" id="valoracionBtns">';
+  ["Correcto", "Mejorable", "Requiere acción inmediata"].forEach(v => {
+    html += `<button data-v="${v}">${v}</button>`;
+  });
+  html += "</div>";
+  html += '<div class="fieldwrap" style="margin-top:12px;">';
+  html += '<label class="field" for="acciones">Acciones correctivas acordadas y plazo</label>';
+  html += '<textarea id="acciones" rows="3" placeholder="Ej.: reponer cartel de extintor en bahía 2 antes del 15/11"></textarea>';
+  html += "</div></div>";
+
+  html += '<div class="card">';
+  html += '<h3 style="font-size:16px;color:var(--navy);margin-bottom:10px;">Firmas</h3>';
+  html += signatureBlock("sigFormador", "Firma del formador");
+  html += '<div style="height:14px;"></div>';
+  html += signatureBlock("sigResponsable", "Firma del responsable del centro");
+  html += "</div>";
+
+  el.innerHTML = html;
+  bindNewView();
+  updateSummary();
+  initSignaturePad("sigFormador");
+  initSignaturePad("sigResponsable");
+}
+
+function signatureBlock(id, label) {
+  return `
+    <div class="sig-row"><span class="sig-label">${label}</span>
+      <button type="button" class="btn btn-ghost btn-sm" data-clear="${id}">Borrar</button>
+    </div>
+    <div class="sigwrap" id="${id}_wrap">
+      <span class="ph" id="${id}_ph">Firma aquí</span>
+      <canvas id="${id}"></canvas>
+    </div>`;
+}
+
+const signaturePads = {};
+function initSignaturePad(id) {
+  const canvas = document.getElementById(id);
+  const wrap = document.getElementById(id + "_wrap");
+  const ph = document.getElementById(id + "_ph");
+  const ctx = canvas.getContext("2d");
+  const ratio = window.devicePixelRatio || 1;
+  function resize() {
+    const rect = wrap.getBoundingClientRect();
+    canvas.width = rect.width * ratio;
+    canvas.height = 130 * ratio;
+    ctx.scale(ratio, ratio);
+    ctx.strokeStyle = "#1C2340";
+    ctx.lineWidth = 2.2;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+  }
+  resize();
+  let drawing = false, has = false;
+  let last = null;
+
+  function pos(e) {
+    const rect = canvas.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return { x: p.clientX - rect.left, y: p.clientY - rect.top };
+  }
+  function start(e) {
+    e.preventDefault();
+    drawing = true; has = true;
+    ph.style.display = "none";
+    last = pos(e);
+  }
+  function move(e) {
+    if (!drawing) return;
+    e.preventDefault();
+    const p = pos(e);
+    ctx.beginPath();
+    ctx.moveTo(last.x, last.y);
+    ctx.lineTo(p.x, p.y);
+    ctx.stroke();
+    last = p;
+  }
+  function end() { drawing = false; }
+
+  canvas.addEventListener("mousedown", start);
+  canvas.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", end);
+  canvas.addEventListener("touchstart", start, { passive: false });
+  canvas.addEventListener("touchmove", move, { passive: false });
+  canvas.addEventListener("touchend", end);
+
+  document.querySelector(`[data-clear="${id}"]`).onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    has = false;
+    ph.style.display = "block";
+  };
+
+  signaturePads[id] = { canvas, hasSignature: () => has };
+}
+
+function getSignatureDataURL(id) {
+  const pad = signaturePads[id];
+  if (!pad || !pad.hasSignature()) return null;
+  return pad.canvas.toDataURL("image/png");
+}
+
+function field(id, label, type, required) {
+  return `<div class="fieldwrap">
+    <label class="field" for="${id}">${label}${required ? " *" : ""}</label>
+    <input type="${type}" id="${id}">
+  </div>`;
+}
+
+function bindNewView() {
+  document.querySelectorAll(".section-head").forEach(h => {
+    h.onclick = () => h.closest(".section").classList.toggle("collapsed");
+  });
+  document.querySelectorAll(".seg").forEach(seg => {
+    const key = seg.dataset.key;
+    seg.querySelectorAll("button").forEach(btn => {
+      btn.onclick = () => {
+        state.items[key].v = btn.dataset.v;
+        seg.querySelectorAll("button").forEach(b => b.classList.remove("on"));
+        btn.classList.add("on");
+        updateSummary();
+        checkReady();
+      };
+    });
+  });
+  document.querySelectorAll("[data-obs]").forEach(inp => {
+    inp.oninput = () => { state.items[inp.dataset.obs].obs = inp.value; };
+  });
+  document.querySelectorAll("[data-photo-input]").forEach(inp => {
+    const key = inp.dataset.photoInput;
+    inp.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      compressImage(file, (dataURL) => {
+        state.items[key].foto = dataURL;
+        drawItemPhoto(key);
+      });
+    };
+  });
+  Object.keys(state.items).forEach(drawItemPhoto);
+  document.querySelectorAll("#valoracionBtns button").forEach(btn => {
+    btn.onclick = () => {
+      state.valoracion = btn.dataset.v;
+      document.querySelectorAll("#valoracionBtns button").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+    };
+  });
+  ["centro", "fecha", "formador"].forEach(id => {
+    document.getElementById(id).oninput = checkReady;
+  });
+
+  // si no eres el responsable, el campo Formador se precarga con tu nombre y no se puede tocar
+  const session = getSession();
+  if (session && session.role !== "admin") {
+    const fInput = document.getElementById("formador");
+    fInput.value = session.zona;
+    fInput.readOnly = true;
+    fInput.style.background = "#F2F2F2";
+    checkReady();
+  }
+}
+
+function drawItemPhoto(key) {
+  const wrap = document.getElementById("photo_" + key);
+  const btn = document.querySelector(`[data-photo-btn="${key}"]`);
+  if (!wrap) return;
+  const foto = state.items[key] && state.items[key].foto;
+  if (foto) {
+    wrap.innerHTML = `<img src="${foto}"><br><button type="button" class="rm-photo" data-rmphoto="${key}">Quitar foto</button>`;
+    if (btn) btn.classList.add("has");
+    const rm = wrap.querySelector("[data-rmphoto]");
+    if (rm) rm.onclick = () => { state.items[key].foto = null; drawItemPhoto(key); };
+  } else {
+    wrap.innerHTML = "";
+    if (btn) btn.classList.remove("has");
+  }
+}
+
+function updateSummary() {
+  let si = 0, no = 0, na = 0;
+  SECTIONS.forEach((s, sidx) => {
+    let secSi = 0, secTotal = s.items.length;
+    s.items.forEach((_, iidx) => {
+      const v = state.items[sidx + "_" + iidx].v;
+      if (v === "si") { si++; secSi++; }
+      else if (v === "no") no++;
+      else if (v === "na") na++;
+    });
+    const cnt = document.getElementById("cnt_" + sidx);
+    if (cnt) cnt.textContent = secSi + "/" + secTotal;
+  });
+  const total = si + no;
+  const pct = total > 0 ? Math.round((si / total) * 100) : null;
+  document.getElementById("stSi").textContent = si;
+  document.getElementById("stNo").textContent = no;
+  document.getElementById("stPct").textContent = pct === null ? "—" : pct + "%";
+  document.getElementById("progFill").style.width = (pct || 0) + "%";
+  if (pct !== null) {
+    document.getElementById("progFill").style.background =
+      pct >= 90 ? "var(--green)" : pct >= 70 ? "#C08A00" : "var(--red)";
+  }
+}
+
+function checkReady() {
+  const centro = document.getElementById("centro").value.trim();
+  const fecha = document.getElementById("fecha").value;
+  const formador = document.getElementById("formador").value.trim();
+  const ready = centro && fecha && formador;
+  document.getElementById("saveBtn").disabled = !ready;
+  document.getElementById("saveMsg").textContent = ready
+    ? "Listo para guardar."
+    : "Completa Centro, Fecha y Formador para guardar.";
+}
+
+// ---------- save ----------
+async function saveChecklist() {
+  const btn = document.getElementById("saveBtn");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+  let si = 0, no = 0, na = 0;
+  const detail = [];
+  SECTIONS.forEach((s, sidx) => {
+    s.items.forEach((text, iidx) => {
+      const it = state.items[sidx + "_" + iidx];
+      if (it.v === "si") si++;
+      else if (it.v === "no") no++;
+      else if (it.v === "na") na++;
+      detail.push({ seccion: s.title, item: text, valor: it.v || "sin marcar", obs: it.obs || "", foto: it.foto || null });
+    });
+  });
+  const total = si + no;
+  const pct = total > 0 ? Math.round((si / total) * 100) : null;
+
+  const record = {
+    id: "chk_" + Date.now(),
+    centro: document.getElementById("centro").value.trim(),
+    ciudad: document.getElementById("ciudad").value.trim(),
+    fecha: document.getElementById("fecha").value,
+    formador: document.getElementById("formador").value.trim(),
+    responsable: document.getElementById("responsable").value.trim(),
+    visitaAnterior: document.getElementById("visitaAnterior").value,
+    si, no, na, pct,
+    valoracion: state.valoracion || (pct === null ? "Sin evaluar" : pct >= 90 ? "Correcto" : pct >= 70 ? "Mejorable" : "Requiere acción inmediata"),
+    acciones: document.getElementById("acciones").value.trim(),
+    detail,
+    firmaFormador: getSignatureDataURL("sigFormador"),
+    firmaResponsable: getSignatureDataURL("sigResponsable"),
+    guardadoEn: new Date().toISOString(),
+  };
+
+  try {
+    const res = await storageSet(record.id, JSON.stringify(record), true);
+    if (!res) throw new Error("sin respuesta");
+    document.getElementById("saveMsg").textContent = "✓ Guardado. Puedes verlo en Histórico.";
+    btn.textContent = "Guardado ✓";
+    setTimeout(() => { resetForm(); }, 1200);
+  } catch (e) {
+    document.getElementById("saveMsg").textContent = "No se pudo guardar. Inténtalo de nuevo.";
+    btn.textContent = "Guardar checklist";
+    btn.disabled = false;
+  }
+}
+
+function resetForm() {
+  state = { items: {}, valoracion: null };
+  SECTIONS.forEach((s, si) => s.items.forEach((_, ii) => { state.items[si + "_" + ii] = { v: null, obs: "", foto: null }; }));
+  renderNew();
+  document.getElementById("saveBtn").textContent = "Guardar checklist";
+  document.getElementById("saveBtn").disabled = true;
+}
+
+// ---------- Historico ----------
+let histCache = null;
+
+async function renderHist() {
+  const el = document.getElementById("viewHist");
+  el.innerHTML = '<div class="loading">Cargando histórico…</div>';
+  try {
+    const list = await storageList("chk_", true);
+    const keys = (list && list.keys) || [];
+    const records = [];
+    for (const k of keys) {
+      try {
+        const r = await storageGet(k, true);
+        if (r && r.value) records.push(JSON.parse(r.value));
+      } catch (e) { /* skip unreadable entry */ }
+    }
+    records.sort((a, b) => (b.guardadoEn || "").localeCompare(a.guardadoEn || ""));
+    const session = getSession();
+    const filtered = (session && session.role !== "admin")
+      ? records.filter(r => (r.formador || "").trim().toLowerCase() === session.zona.toLowerCase())
+      : records;
+    histCache = filtered;
+    drawHist(filtered);
+  } catch (e) {
+    el.innerHTML = '<div class="empty">No se pudo cargar el histórico. Inténtalo de nuevo más tarde.</div>';
+  }
+}
+
+function drawHist(records) {
+  const el = document.getElementById("viewHist");
+  if (!records.length) {
+    el.innerHTML = '<div class="empty">Todavía no hay checklists guardados.<br>Los que se guarden en "Nuevo checklist" aparecerán aquí.</div>';
+    return;
+  }
+  const centros = Array.from(new Set(records.map(r => r.centro))).sort();
+  let html = '<div class="card">';
+  html += '<div class="hist-toolbar">';
+  html += '<select id="filterCentro"><option value="">Todos los centros</option>' +
+    centros.map(c => `<option value="${c}">${c}</option>`).join("") + "</select>";
+  html += '<button class="btn btn-ghost btn-sm" id="exportBtn">Exportar CSV</button>';
+  html += "</div>";
+  const session = getSession();
+  const ambito = (session && session.role !== "admin") ? "tuyos" : "de toda la red";
+  html += `<div style="font-size:12px;color:var(--muted);">${records.length} checklist(s) ${ambito}.</div>`;
+  html += "</div>";
+  html += '<div id="entriesWrap"></div>';
+  el.innerHTML = html;
+
+  document.getElementById("exportBtn").onclick = () => exportCSV(getFiltered());
+  document.getElementById("filterCentro").onchange = () => renderEntries(getFiltered());
+
+  function getFiltered() {
+    const c = document.getElementById("filterCentro").value;
+    return c ? records.filter(r => r.centro === c) : records;
+  }
+  renderEntries(records);
+}
+
+function renderEntries(records) {
+  const wrap = document.getElementById("entriesWrap");
+  wrap.innerHTML = records.map(r => {
+    const badgeClass = r.valoracion === "Correcto" ? "ok" : r.valoracion === "Mejorable" ? "warn" : "bad";
+    const detailRows = r.detail.map(d =>
+      `<div class="di"><b>${d.item}</b> — ${d.valor.toUpperCase()}${d.obs ? " · " + d.obs : ""}${d.foto ? '<br><img src="'+d.foto+'" style="height:60px;border-radius:6px;border:1px solid var(--line);margin-top:4px;">' : ''}</div>`
+    ).join("");
+    const sigRow = (r.firmaFormador || r.firmaResponsable) ? `<div class="di" style="border-top:none;padding-top:10px;">
+        ${r.firmaFormador ? '<img src="'+r.firmaFormador+'" alt="Firma formador" style="height:40px;border:1px solid var(--line);border-radius:6px;margin-right:8px;background:#fff;">' : ''}
+        ${r.firmaResponsable ? '<img src="'+r.firmaResponsable+'" alt="Firma responsable" style="height:40px;border:1px solid var(--line);border-radius:6px;background:#fff;">' : ''}
+      </div>` : "";
+    return `<div class="entry" data-id="${r.id}">
+      <div class="entry-top">
+        <div>
+          <div class="c">${r.centro}${r.ciudad ? " · " + r.ciudad : ""}</div>
+          <div class="d">${r.fecha} · Formador: ${r.formador}</div>
+        </div>
+        <span class="badge ${badgeClass}">${r.pct === null ? "—" : r.pct + "%"}</span>
+      </div>
+      <div class="entry-meta">Sí: ${r.si} · No: ${r.no} · N/A: ${r.na}${r.acciones ? " · Acciones: " + r.acciones : ""}</div>
+      <div class="entry-detail">${detailRows}${sigRow}</div>
+    </div>`;
+  }).join("");
+  wrap.querySelectorAll(".entry").forEach(e => {
+    e.onclick = (ev) => { e.classList.toggle("open"); };
+  });
+}
+
+function exportCSV(records) {
+  const rows = [["Centro","Ciudad/Provincia","Fecha","Formador","Responsable","Sí","No","N/A","% correcto","Valoración","Acciones correctivas","Guardado en"]];
+  records.forEach(r => {
+    rows.push([r.centro, r.ciudad, r.fecha, r.formador, r.responsable, r.si, r.no, r.na, r.pct, r.valoracion, r.acciones, r.guardadoEn]);
+  });
+  const csv = rows.map(row => row.map(v => `"${String(v ?? "").replace(/"/g, '""')}"`).join(",")).join("\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "checklists_orden_limpieza.csv";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+// ---------- tabs ----------
+document.getElementById("tabNewBtn").onclick = () => switchTab("new");
+document.getElementById("tabHistBtn").onclick = () => switchTab("hist");
+document.getElementById("tabAgendaBtn").onclick = () => switchTab("agenda");
+document.getElementById("tabTecnicosBtn").onclick = () => switchTab("tecnicos");
+const TAB_TITLES = { new: "Nuevo checklist", hist: "Histórico", agenda: "Mi agenda", tecnicos: "Técnicos" };
+function switchTab(tab) {
+  document.getElementById("tabNewBtn").classList.toggle("active", tab === "new");
+  document.getElementById("tabHistBtn").classList.toggle("active", tab === "hist");
+  document.getElementById("tabAgendaBtn").classList.toggle("active", tab === "agenda");
+  document.getElementById("tabTecnicosBtn").classList.toggle("active", tab === "tecnicos");
+  document.getElementById("viewNew").style.display = tab === "new" ? "block" : "none";
+  document.getElementById("viewHist").style.display = tab === "hist" ? "block" : "none";
+  document.getElementById("viewAgenda").style.display = tab === "agenda" ? "block" : "none";
+  document.getElementById("viewTecnicos").style.display = tab === "tecnicos" ? "block" : "none";
+  document.getElementById("saveBar").style.display = tab === "new" ? "flex" : "none";
+  document.getElementById("pageTitle").textContent = TAB_TITLES[tab];
+  if (tab === "hist") renderHist();
+  if (tab === "agenda") renderAgenda();
+  if (tab === "tecnicos") renderTecnicos();
+}
+
+// ---------- Mi agenda ----------
+let agendaCache = null;
+const FORMADORES = ["Cristian", "Javier", "Hugo", "Iñaki", "Pendiente de asignar"];
+const MES_NOMBRE = ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"];
+
+async function loadAgendaData() {
+  if (agendaCache) return agendaCache;
+  const res = await fetch("agenda_data.json");
+  agendaCache = await res.json();
+  return agendaCache;
+}
+
+let agendaSubTab = "pendientes";
+
+async function renderAgenda() {
+  const el = document.getElementById("viewAgenda");
+  const session = getSession();
+  const isAdmin = session && session.role === "admin";
+  const savedFormador = (session && !isAdmin) ? session.zona : (localStorage.getItem("agenda_formador") || FORMADORES[0]);
+  el.innerHTML = `
+    <div class="card">
+      <label class="field" style="margin-bottom:8px;">${isAdmin ? "¿Qué formador quieres ver?" : "Formador"}</label>
+      ${isAdmin
+        ? `<div class="formador-select" id="formadorSelect">
+             ${FORMADORES.map(f => `<button data-f="${f}" class="${f === savedFormador ? "on" : ""}">${f}</button>`).join("")}
+           </div>`
+        : `<div class="formador-select"><button class="on" style="cursor:default;">${savedFormador}</button></div>`}
+    </div>
+    <div id="agendaBody"><div class="loading">Cargando agenda…</div></div>
+  `;
+  if (isAdmin) {
+    document.querySelectorAll("#formadorSelect button").forEach(btn => {
+      btn.onclick = () => {
+        document.querySelectorAll("#formadorSelect button").forEach(b => b.classList.remove("on"));
+        btn.classList.add("on");
+        localStorage.setItem("agenda_formador", btn.dataset.f);
+        drawAgendaBody(btn.dataset.f);
+      };
+    });
+  }
+  drawAgendaBody(savedFormador);
+}
+
+async function drawAgendaBody(formador) {
+  const body = document.getElementById("agendaBody");
+  body.innerHTML = '<div class="loading">Cargando agenda…</div>';
+  let data;
+  try {
+    data = await loadAgendaData();
+  } catch (e) {
+    body.innerHTML = '<div class="empty">No se pudo cargar la agenda (agenda_data.json). Comprueba que el archivo está subido junto al resto de la app.</div>';
+    return;
+  }
+  let mine = data.filter(s => s.zona === formador && s.fecha).map(s => ({ ...s }));
+  if (!mine.length) {
+    body.innerHTML = '<div class="empty">No hay sesiones asignadas todavía para esta zona.</div>';
+    return;
+  }
+
+  // aplicar reprogramaciones guardadas (capa por encima del calendario base) y reordenar
+  await applyOverrides(mine);
+  mine.sort((a, b) => a.fecha.localeCompare(b.fecha));
+
+  const today = new Date().toISOString().slice(0, 10);
+  const upcoming = mine.filter(s => s.fecha >= today);
+  const next = upcoming[0] || mine[mine.length - 1];
+
+  let signedIds = new Set();
+  try {
+    const list = await storageList("ses_", true);
+    signedIds = new Set((list.keys || []).map(k => k.replace("ses_", "")));
+  } catch (e) { /* si falla, se asume ninguna firmada todavía */ }
+  const completadas = mine.filter(s => signedIds.has(s.id)).length;
+  const pendientes = mine.length - completadas;
+
+  let html = "";
+  if (next) {
+    const d = new Date(next.fecha + "T00:00:00");
+    const dstr = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long" });
+    const nextColor = { "Técnica": "#C0392B", "Booking": "#C08A00", "Comercial": "#2E75B6" }[next.tipo] || "#0F5C4D";
+    const nextIcon = { "Técnica": "🔧", "Booking": "📅", "Comercial": "💬" }[next.tipo] || "";
+    html += `<div class="next-session" style="background:linear-gradient(135deg, var(--navy), ${nextColor});">
+      <div class="tag">${upcoming.length ? "Próxima sesión" : "Última sesión programada"} · ${nextIcon} ${next.tipo}</div>
+      <div class="d">${dstr}</div>
+      <div class="s">${next.turno} · 📍 ${next.sede_central || next.cluster} · ${next.area}</div>
+    </div>`;
+  }
+  const pct = mine.length ? Math.round(completadas / mine.length * 100) : 0;
+  html += `<div class="card" style="margin-bottom:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:baseline;">
+      <span style="font-size:13px; font-weight:700; color:var(--navy);">Progreso total</span>
+      <span style="font-size:12.5px; color:var(--muted);">${completadas} de ${mine.length} firmadas (${pct}%)</span>
+    </div>
+    <div class="progress-bar"><div style="width:${pct}%; background:${pct === 100 ? "var(--green)" : "var(--navy)"};"></div></div>
+  </div>`;
+  html += `<div class="agenda-stats" id="statsNav">
+    <div class="stat stat-btn ${agendaSubTab === "pendientes" ? "on" : ""}" data-t="pendientes">
+      <div class="n">${pendientes}</div><div class="l">📋 Sesiones</div>
+    </div>
+    <div class="stat stat-btn ${agendaSubTab === "firmadas" ? "on" : ""}" data-t="firmadas">
+      <div class="n">${completadas}</div><div class="l">🗂️ Firmadas</div>
+    </div>
+  </div>`;
+  html += `<div class="agenda-legend">
+    <span><i style="background:#C0392B;"></i>🔧 Técnica</span>
+    <span><i style="background:#C08A00;"></i>📅 Booking</span>
+    <span><i style="background:#2E75B6;"></i>💬 Comercial</span>
+  </div>`;
+
+  const listToShow = agendaSubTab === "firmadas" ? mine.filter(s => signedIds.has(s.id)) : mine.filter(s => !signedIds.has(s.id));
+
+  if (!listToShow.length) {
+    html += `<div class="empty">${agendaSubTab === "firmadas" ? "Todavía no has firmado ninguna sesión." : "No te quedan sesiones pendientes — están todas firmadas 🎉"}</div>`;
+  } else {
+    let lastMonth = "";
+    listToShow.forEach(s => {
+      const d = new Date(s.fecha + "T00:00:00");
+      const monthKey = MES_NOMBRE[d.getMonth()] + " " + d.getFullYear();
+      if (monthKey !== lastMonth) {
+        html += `<div class="agenda-month">${monthKey}</div>`;
+        lastMonth = monthKey;
+      }
+      const dstr = d.toLocaleDateString("es-ES", { weekday: "short", day: "numeric", month: "short" });
+      const clsMap = { "Técnica": "tecnica", "Booking": "booking", "Comercial": "comercial" };
+      const iconMap = { "Técnica": "🔧", "Booking": "📅", "Comercial": "💬" };
+      const cls = clsMap[s.tipo] || "";
+      html += `<div class="agenda-item ${cls}" data-sid="${s.id}">
+        <span class="signed-badge" id="badge_${s.id}" style="display:none;">✓ Firmado</span>
+        ${s._reprogramada ? '<span class="reprog-badge" style="position:absolute;top:11px;right:100px;">Reprogramada</span>' : ''}
+        <span class="pq-badge ${cls}">${iconMap[s.tipo] || ''} ${s.tipo}</span>
+        <div class="row1"><span class="date">${dstr}</span><span class="turno">${s.turno}</span></div>
+        <div class="area">${s.area}</div>
+        <div class="meta">📍 <b>${s.sede_central || s.cluster}</b> (${s.cluster}) · ${s.n_tecnicos} técnico(s) · ${s.fase}</div>
+      </div>`;
+    });
+  }
+  body.innerHTML = html;
+
+  document.querySelectorAll("#statsNav .stat-btn").forEach(btn => {
+    btn.onclick = () => { agendaSubTab = btn.dataset.t; drawAgendaBody(formador); };
+  });
+  document.querySelectorAll(".agenda-item").forEach(item => {
+    item.onclick = () => openSessionModal(mine.find(s => s.id === item.dataset.sid));
+  });
+  applySignedBadges(signedIds);
+}
+
+async function applyOverrides(sessions) {
+  try {
+    const list = await storageList("over_", true);
+    const keys = (list && list.keys) || [];
+    for (const k of keys) {
+      const id = k.replace("over_", "");
+      const s = sessions.find(x => x.id === id);
+      if (!s) continue;
+      try {
+        const r = await storageGet(k, true);
+        const ov = JSON.parse(r.value);
+        s.fecha = ov.fecha;
+        s.turno = ov.turno;
+        s._reprogramada = true;
+        s._motivo = ov.motivo;
+        s.fase = s.fecha <= "2027-02-28" ? "Fase 1 (19-oct a 28-feb)" : "Fase 2 (refuerzo)";
+      } catch (e) { /* override ilegible: se ignora */ }
+    }
+  } catch (e) { /* sin overrides o error de lectura: se muestra el calendario base */ }
+}
+
+function applySignedBadges(signedIds) {
+  signedIds.forEach(id => {
+    const b = document.getElementById("badge_" + id);
+    if (b) b.style.display = "inline-block";
+  });
+}
+
+// ---------- Técnicos (directorio con buscador) ----------
+async function renderTecnicos() {
+  const el = document.getElementById("viewTecnicos");
+  el.innerHTML = '<div class="loading">Cargando técnicos…</div>';
+  const session = getSession();
+  const isAdmin = session && session.role === "admin";
+  let data;
+  try {
+    data = await loadAgendaData();
+  } catch (e) {
+    el.innerHTML = '<div class="empty">No se pudo cargar la agenda.</div>';
+    return;
+  }
+  const scoped = isAdmin ? data : data.filter(s => s.zona === session.zona);
+
+  const tecMap = new Map();
+  scoped.forEach(s => {
+    (s.tecnicos_detail || []).forEach(t => {
+      const key = t.nombre + "||" + t.ciudad;
+      if (!tecMap.has(key)) tecMap.set(key, { nombre: t.nombre, ciudad: t.ciudad, zona: s.zona, n: 0 });
+      tecMap.get(key).n += 1;
+    });
+  });
+  const tecnicos = Array.from(tecMap.values()).sort((a, b) => a.nombre.localeCompare(b.nombre));
+
+  el.innerHTML = `
+    <div class="card">
+      <label class="field" style="margin-bottom:8px;">Buscar técnico</label>
+      <input type="text" id="tecSearch" placeholder="Escribe un nombre…" style="width:100%; padding:10px 12px; border:1.5px solid var(--line); border-radius:9px; font-size:15px;">
+    </div>
+    <div id="tecList"></div>
+  `;
+  function draw(filter) {
+    const f = (filter || "").trim().toLowerCase();
+    const filtered = f ? tecnicos.filter(t => t.nombre.toLowerCase().includes(f)) : tecnicos;
+    const wrap = document.getElementById("tecList");
+    if (!filtered.length) {
+      wrap.innerHTML = '<div class="empty">No hay técnicos con ese nombre.</div>';
+      return;
+    }
+    wrap.innerHTML = filtered.map(t => `
+      <div class="entry tec-card" data-key="${t.nombre}||${t.ciudad}">
+        <div class="entry-top">
+          <div>
+            <div class="c">${t.nombre}</div>
+            <div class="d">${t.ciudad}${isAdmin ? " · " + t.zona : ""}</div>
+          </div>
+          <span class="badge" style="background:var(--ice-soft); color:var(--navy);">${t.n} sesión(es)</span>
+        </div>
+      </div>
+    `).join("");
+    wrap.querySelectorAll(".tec-card").forEach(card => {
+      card.onclick = () => openTecnicoModal(card.dataset.key.split("||")[0], card.dataset.key.split("||")[1], scoped);
+    });
+  }
+  draw("");
+  document.getElementById("tecSearch").oninput = (e) => draw(e.target.value);
+}
+
+async function openTecnicoModal(nombre, ciudad, scopedSessions) {
+  const existing = document.getElementById("modalBackdrop");
+  if (existing) existing.remove();
+  const misSesiones = scopedSessions.filter(s => (s.tecnicos_detail || []).some(t => t.nombre === nombre && t.ciudad === ciudad));
+  let signedIds = new Set();
+  try {
+    const list = await storageList("ses_", true);
+    signedIds = new Set((list.keys || []).map(k => k.replace("ses_", "")));
+  } catch (e) { /* sin firmas registradas todavia */ }
+
+  const pendientes = misSesiones.filter(s => !signedIds.has(s.id)).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+  const completadas = misSesiones.filter(s => signedIds.has(s.id)).sort((a, b) => (a.fecha || "").localeCompare(b.fecha || ""));
+
+  function fila(s) {
+    const d = s.fecha ? new Date(s.fecha + "T00:00:00").toLocaleDateString("es-ES", { day: "numeric", month: "short", year: "numeric" }) : "Sin fecha";
+    const foco = (s.area.match(/foco:\s*(.+)$/) || [])[1] || s.area;
+    const clsMap = { "Técnica": "tecnica", "Booking": "booking", "Comercial": "comercial" };
+    const iconMap = { "Técnica": "🔧", "Booking": "📅", "Comercial": "💬" };
+    return `<div class="agenda-item ${clsMap[s.tipo] || ""}" style="margin-bottom:8px; cursor:default;">
+      <span class="pq-badge ${clsMap[s.tipo] || ""}">${iconMap[s.tipo] || ""} ${s.tipo}</span>
+      <div class="row1"><span class="date">${d}</span><span class="turno">${s.turno || ""}</span></div>
+      <div class="area">${foco}</div>
+      <div class="meta">📍 ${s.sede_central || s.cluster}</div>
+    </div>`;
+  }
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.id = "modalBackdrop";
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-close"><button id="modalCloseBtn">✕</button></div>
+      <h2>${nombre}</h2>
+      <div class="sub">${ciudad}</div>
+      <div class="card">
+        <h3 style="font-size:14px;color:var(--navy);margin-bottom:8px;">📋 Sesiones pendientes (${pendientes.length})</h3>
+        ${pendientes.length ? pendientes.map(fila).join("") : '<div class="empty" style="padding:14px;">Ninguna pendiente 🎉</div>'}
+      </div>
+      <div class="card">
+        <h3 style="font-size:14px;color:var(--navy);margin-bottom:8px;">🗂️ Sesiones completadas (${completadas.length})</h3>
+        ${completadas.length ? completadas.map(fila).join("") : '<div class="empty" style="padding:14px;">Todavía ninguna.</div>'}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  document.getElementById("modalCloseBtn").onclick = closeSessionModal;
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeSessionModal(); });
+}
+
+// ---------- modal de sesion: firma + adjuntos ----------
+let modalFiles = [];
+const MAX_PAYLOAD = 3.8 * 1024 * 1024; // margen bajo el límite de 5MB de la clave de almacenamiento
+
+function renderTecnicosDetail(session) {
+  if (!session.tecnicos_detail || !session.tecnicos_detail.length) {
+    return `<div style="font-size:13px;">${session.tecnicos || "—"}</div>`;
+  }
+  return session.tecnicos_detail.map(d => `
+    <div class="tec-row">
+      <div class="tec-name">${d.nombre} <span class="tec-city">(${d.ciudad})</span></div>
+    </div>`).join("");
+}
+
+async function openSessionModal(session) {
+  modalFiles = [];
+  session._fechaOriginal = session.fecha;
+  session._turnoOriginal = session.turno;
+  const existing = document.getElementById("modalBackdrop");
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.id = "modalBackdrop";
+  const d = new Date(session.fecha + "T00:00:00");
+  const dstr = d.toLocaleDateString("es-ES", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+
+  backdrop.innerHTML = `
+    <div class="modal-sheet">
+      <div class="modal-close"><button id="modalCloseBtn">✕</button></div>
+      <h2>${session.area}</h2>
+      <div class="sub">${dstr} · ${session.turno} · 📍 ${session.sede_central || session.cluster} (${session.cluster})${session._reprogramada ? '<span class="reprog-badge">Reprogramada</span>' : ''}</div>
+      <div class="card" style="margin-bottom:0;">
+        <div style="font-size:12.5px;color:var(--muted);margin-bottom:8px;">Técnicos convocados — qué reforzar con cada uno</div>
+        ${renderTecnicosDetail(session)}
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--navy);margin-bottom:8px;">Cambiar fecha / turno</h3>
+        <div class="reprog-row">
+          <input type="date" id="reprogFecha" value="${session.fecha}">
+        </div>
+        <div class="turno-select" id="reprogTurno" style="margin-top:8px;">
+          <button type="button" data-t="Mañana (9:00-13:00)" class="${session.turno.startsWith("Mañana") ? "on" : ""}">Mañana</button>
+          <button type="button" data-t="Tarde (14:00-18:00)" class="${session.turno.startsWith("Tarde") ? "on" : ""}">Tarde</button>
+        </div>
+        <input type="text" id="reprogMotivo" placeholder="Motivo del cambio (opcional)" style="margin-top:8px;" value="${session._motivo || ""}">
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--navy);margin-bottom:8px;">Documentación firmada de la sesión</h3>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">Haz una foto del control de asistencia u otro documento ya firmado en papel, o adjunta un PDF (cuestionario del SEPE, etc.).</div>
+        <label class="filepicker">
+          📷 Toca para hacer foto o adjuntar archivo
+          <input type="file" id="fileInput" accept="image/*,application/pdf" multiple>
+        </label>
+        <div class="filelist" id="fileList"></div>
+      </div>
+
+      <div class="card">
+        <h3 style="font-size:15px;color:var(--navy);margin-bottom:10px;">Firma de conformidad</h3>
+        ${signatureBlock("sigSesion", "Firma del formador")}
+      </div>
+
+      <div class="modal-savebar">
+        <button class="btn btn-ghost" id="modalCancelBtn">Cancelar</button>
+
+        <button class="btn btn-primary" id="modalSaveBtn">Guardar</button>
+      </div>
+      <div id="undoWrap" style="text-align:center; margin-top:10px;"></div>
+      <div class="sesion-msg" id="modalMsg"></div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+  initSignaturePad("sigSesion");
+
+  document.getElementById("modalCloseBtn").onclick = closeSessionModal;
+  document.getElementById("modalCancelBtn").onclick = closeSessionModal;
+  backdrop.addEventListener("click", (e) => { if (e.target === backdrop) closeSessionModal(); });
+
+  document.querySelectorAll("#reprogTurno button").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll("#reprogTurno button").forEach(b => b.classList.remove("on"));
+      btn.classList.add("on");
+    };
+  });
+
+  document.getElementById("fileInput").onchange = (e) => handleFiles(e.target.files);
+  document.getElementById("modalSaveBtn").onclick = () => saveSessionRecord(session);
+
+  // cargar registro existente si lo hay
+  try {
+    const r = await storageGet("ses_" + session.id, true);
+    const rec = JSON.parse(r.value);
+    modalFiles = rec.archivos || [];
+    renderFileList();
+    document.getElementById("modalMsg").textContent = "Ya había un registro guardado para esta sesión — puedes revisarlo o actualizarlo.";
+    document.getElementById("undoWrap").innerHTML =
+      '<button type="button" class="btn btn-ghost btn-sm" id="undoSignBtn" style="color:var(--red);">🗑️ Deshacer firma y borrar documentos (por error)</button>';
+    document.getElementById("undoSignBtn").onclick = () => undoSignature(session);
+  } catch (e) { /* no había registro previo, formulario en blanco */ }
+}
+
+function closeSessionModal() {
+  const el = document.getElementById("modalBackdrop");
+  if (el) el.remove();
+}
+
+function renderFileList() {
+  const wrap = document.getElementById("fileList");
+  if (!wrap) return;
+  wrap.innerHTML = modalFiles.map((f, i) => `
+    <div class="fileitem">
+      ${f.dataURL.startsWith("data:image") ? `<img src="${f.dataURL}">` : "📄"}
+      <span class="fname">${f.name}</span>
+      <button type="button" class="frm" data-i="${i}">Quitar</button>
+    </div>
+  `).join("");
+  wrap.querySelectorAll(".frm").forEach(btn => {
+    btn.onclick = () => { modalFiles.splice(Number(btn.dataset.i), 1); renderFileList(); };
+  });
+}
+
+function currentPayloadSize() {
+  return modalFiles.reduce((sum, f) => sum + f.dataURL.length, 0);
+}
+
+function handleFiles(fileList) {
+  const msg = document.getElementById("modalMsg");
+  Array.from(fileList).forEach(file => {
+    if (file.type.startsWith("image/")) {
+      compressImage(file, (dataURL) => addFile(file.name, dataURL));
+    } else if (file.type === "application/pdf") {
+      const reader = new FileReader();
+      reader.onload = () => addFile(file.name, reader.result);
+      reader.readAsDataURL(file);
+    } else {
+      msg.textContent = `"${file.name}" no es una imagen ni un PDF — no se ha adjuntado.`;
+    }
+  });
+  document.getElementById("fileInput").value = "";
+}
+
+function addFile(name, dataURL) {
+  const msg = document.getElementById("modalMsg");
+  if (currentPayloadSize() + dataURL.length > MAX_PAYLOAD) {
+    msg.textContent = "No caben más archivos en esta sesión (límite ~3.5 MB en total). Elimina alguno o reduce el tamaño de las fotos.";
+    return;
+  }
+  modalFiles.push({ name, dataURL });
+  msg.textContent = "";
+  renderFileList();
+}
+
+function compressImage(file, cb) {
+  const img = new Image();
+  const reader = new FileReader();
+  reader.onload = () => {
+    img.onload = () => {
+      const maxDim = 1400;
+      let { width, height } = img;
+      if (width > height && width > maxDim) { height *= maxDim / width; width = maxDim; }
+      else if (height > maxDim) { width *= maxDim / height; height = maxDim; }
+      const canvas = document.createElement("canvas");
+      canvas.width = width; canvas.height = height;
+      canvas.getContext("2d").drawImage(img, 0, 0, width, height);
+      cb(canvas.toDataURL("image/jpeg", 0.72));
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function saveSessionRecord(session) {
+  const btn = document.getElementById("modalSaveBtn");
+  const msg = document.getElementById("modalMsg");
+  const firma = getSignatureDataURL("sigSesion");
+  btn.disabled = true;
+  btn.textContent = "Guardando…";
+
+  const nuevaFecha = document.getElementById("reprogFecha").value;
+  const turnoBtn = document.querySelector("#reprogTurno button.on");
+  const nuevoTurno = turnoBtn ? turnoBtn.dataset.t : session.turno;
+  const motivo = document.getElementById("reprogMotivo").value.trim();
+  const fechaCambiada = nuevaFecha && (nuevaFecha !== session._fechaOriginal);
+  const turnoCambiado = nuevoTurno !== session._turnoOriginal;
+
+  try {
+    // 1) guardar el cambio de fecha/turno como una capa aparte (no reescribe el calendario base)
+    if (fechaCambiada || turnoCambiado) {
+      const override = {
+        sessionId: session.id, fecha: nuevaFecha, turno: nuevoTurno, motivo,
+        actualizadoEn: new Date().toISOString(),
+      };
+      const r1 = await storageSet("over_" + session.id, JSON.stringify(override), true);
+      if (!r1) throw new Error("sin respuesta (override)");
+    }
+
+    // 2) guardar firma/adjuntos solo si hay algo que guardar
+    if (firma || modalFiles.length) {
+      const record = {
+        sessionId: session.id, zona: session.zona, fecha: nuevaFecha || session.fecha,
+        tipo: session.tipo, area: session.area, cluster: session.cluster, tecnicos: session.tecnicos,
+        firma: firma, archivos: modalFiles, guardadoEn: new Date().toISOString(),
+      };
+      const r2 = await storageSet("ses_" + session.id, JSON.stringify(record), true);
+      if (!r2) throw new Error("sin respuesta (firma)");
+      const badge = document.getElementById("badge_" + session.id);
+      if (badge) badge.style.display = "inline-block";
+    }
+
+    msg.textContent = "✓ Guardado.";
+    btn.textContent = "Guardado ✓";
+    setTimeout(() => { closeSessionModal(); drawAgendaBody(session.zona); }, 900);
+  } catch (e) {
+    msg.textContent = "No se pudo guardar (puede que el conjunto de archivos sea demasiado grande). Prueba a quitar alguno.";
+    btn.textContent = "Guardar";
+    btn.disabled = false;
+  }
+}
+
+async function undoSignature(session) {
+  if (!confirm("¿Seguro que quieres deshacer la firma? Se borrará la firma y los documentos adjuntos de esta sesión, y volverá a Sesiones pendientes.")) return;
+  const msg = document.getElementById("modalMsg");
+  try {
+    await storageDelete("ses_" + session.id, true);
+    msg.textContent = "✓ Firma y documentos borrados. La sesión vuelve a Pendientes.";
+    const badge = document.getElementById("badge_" + session.id);
+    if (badge) badge.style.display = "none";
+    setTimeout(() => { closeSessionModal(); drawAgendaBody(session.zona); }, 900);
+  } catch (e) {
+    msg.textContent = "No se pudo deshacer la firma. Inténtalo de nuevo.";
+  }
+}
+
+document.getElementById("saveBtn").onclick = saveChecklist;
+
+const _existingSession = getSession();
+if (_existingSession && CREDENTIALS[_existingSession.user]) {
+  startApp(_existingSession);
+} else {
+  document.getElementById("loginOverlay").style.display = "flex";
+}
+</script>
+</body>
+</html>
